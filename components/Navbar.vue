@@ -10,7 +10,9 @@ import { Icon } from '@iconify/vue/dist/iconify.js';
       <div class="flex items-center justify-between gap-8 flex-wrap">
         <!-- Left Side - Brand Identity -->
         <div class="flex items-center gap-1">
-          <NuxtImg src="/logo.png" class="h-12" />
+          <NuxtLink href="/">
+            <NuxtImg src="/assets/logo.png" class="h-12" />
+          </NuxtLink>
         </div>
 
         <!-- Right Side - Navigation -->

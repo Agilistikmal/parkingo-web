@@ -10,7 +10,7 @@ useSeoMeta({
 </script>
 
 <template>
-  <div class="bg-black min-h-scree">
+  <div class="bg-black min-h-screen">
     <slot name="navbar">
       <Navbar />
     </slot>
