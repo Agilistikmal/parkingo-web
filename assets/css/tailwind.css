@@ -1,0 +1,25 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --font-jakarta: "Plus Jakarta Sans", "sans-serif";
+
+  --color-brand: oklch(84.03% 0.1724 84.08);
+  --color-black: oklch(20.88% 0 84.08);
+  --color-accent: oklch(84.41% 0.0789 282.71);
+}
+
+@layer base {
+  h1 {
+    @apply text-3xl lg:text-6xl font-bold;
+  }
+  h2 {
+    @apply text-2xl lg:text-4xl font-bold;
+  }
+  h3 {
+    @apply text-xl lg:text-2xl;
+  }
+  h4 {
+    @apply text-lg lg:text-xl;
+  }
+}
