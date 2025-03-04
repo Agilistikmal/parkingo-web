@@ -22,4 +22,8 @@
   h4 {
     @apply text-lg lg:text-xl;
   }
+
+  input {
+    @apply outline-none focus:outline-none focus:bg-amber-100 px-5 py-2 bg-white text-black rounded-3xl;
+  }
 }

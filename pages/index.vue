@@ -30,7 +30,7 @@ useSeoMeta({
         <!-- Left side -->
         <div class="text-center md:text-left">
           <NuxtImg src="/assets/logo.png" class="h-16" />
-          <h3>Solusi simpel parkir modern</h3>
+          <h3>Solusi pintar parkir modern</h3>
           <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 mx-auto md:mx-0" />
           <div class="flex items-center gap-2 mt-5 justify-center md:justify-start">
             <NuxtLink href="/places">
