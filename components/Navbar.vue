@@ -23,7 +23,7 @@ import { Icon } from '@iconify/vue/dist/iconify.js';
             <NuxtLink href="/">
               <span>Beranda</span>
             </NuxtLink>
-            <NuxtLink href="/booking">
+            <NuxtLink href="/bookings">
               <span>Booking</span>
             </NuxtLink>
           </div>

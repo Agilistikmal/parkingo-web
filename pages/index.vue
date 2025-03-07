@@ -33,7 +33,7 @@ useSeoMeta({
           <h3>Solusi pintar parkir modern</h3>
           <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 mx-auto md:mx-0" />
           <div class="flex items-center gap-2 mt-5 justify-center md:justify-start">
-            <NuxtLink href="/places">
+            <NuxtLink href="/p">
               <Button class="mt-2">
                 <template #icon>
                   <Icon icon="mdi:parking" width="24" height="24" />

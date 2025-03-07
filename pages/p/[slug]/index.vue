@@ -23,6 +23,21 @@ useSeoMeta({
 
 const selected = ref();
 
+const parking = ref({
+  "id": "mall_abc",
+  "name": "Mall ABC",
+  "layout": [
+    ["EMPTY", "P", "P", "DOOR", "P", "P", "P", "P", "EMPTY"],
+    ["EMPTY", "ROAD", "ROAD", "ROAD", "ROAD", "ROAD", "ROAD", "ROAD", "EXIT"],
+    ["EMPTY", "ROAD", "P", "P", "ROAD", "P", "P", "ROAD", "P"],
+    ["IN", "ROAD", "ROAD", "ROAD", "ROAD", "P", "P", "ROAD", "P"],
+    ["EMPTY", "P", "P", "P", "ROAD", "ROAD", "ROAD", "ROAD", "P"],
+  ],
+  "created_at": "2025-03-07T12:00:00Z",
+  "updated_at": "2025-03-07T12:30:00Z"
+}
+)
+
 </script>
 
 <template>
@@ -39,6 +54,51 @@ const selected = ref();
         <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 mx-auto md:mx-0" />
       </div>
       <!-- End Hero -->
+
+      <!-- Parking Layout -->
+      <div class="mt-5 flex flex-col bg-black w-full">
+        <div v-for="(row, indexRow) in parking.layout" class="flex">
+          <div v-for="(slot, indexSlot) in row">
+            <button v-if="slot == `P`"
+              :class="`block relative w-16 aspect-square bg-white/10 ${selected == `${indexRow}-${indexSlot}` && `bg-accent`} p-1 cursor-pointer`"
+              @click="selected = `${indexRow}-${indexSlot}`">
+              <div
+                class="border-4 border-white/25 text-white/70 border-dotted w-full h-full mx-auto text-center flex items-center gap-2">
+                <div class="mx-auto">
+                  <Icon icon="mdi:parking" width="24" height="24" />
+                  <div class="text-xs text-white/50 absolute left-0 bottom-2 mx-auto w-full">
+                    <span>{{ indexRow }}-{{ indexSlot }}</span>
+                  </div>
+                </div>
+              </div>
+            </button>
+            <div v-if="slot == `EMPTY`"
+              :class="`w-16 aspect-square text-center bg-transparent flex items-center gap-2`">
+            </div>
+            <div v-if="slot == `ROAD`" :class="`w-16 aspect-square text-center bg-white/10 flex items-center gap-2`">
+            </div>
+            <div v-if="slot == `IN`"
+              :class="`w-16 aspect-square text-center bg-green-200 text-green-500 font-semibold flex items-center gap-2`">
+              <div class="mx-auto">
+                {{ slot }}
+              </div>
+            </div>
+            <div v-if="slot == `DOOR`"
+              :class="`w-16 aspect-square text-center bg-green-500 text-green-200 font-semibold flex items-center gap-2`">
+              <div class="mx-auto">
+                {{ slot }}
+              </div>
+            </div>
+            <div v-if="slot == `EXIT`"
+              :class="`w-16 aspect-square text-center bg-red-200 text-red-500 font-semibold flex items-center gap-2`">
+              <div class="mx-auto">
+                {{ slot }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- End Parking Layout -->
 
       <!-- Available Map -->
       <div class="mt-5 grid grid-cols-12 gap-2">
