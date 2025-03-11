@@ -2,6 +2,16 @@
 import { NuxtImg } from '#components';
 import { Icon } from '@iconify/vue/dist/iconify.js';
 
+async function handleLogin() {
+  const res = await fetch("https://parkingo-core.agil.zip/v1/authenticate?redirect_url=" + window.location.origin)
+  if (res.status == 200) {
+    const body = await res.json()
+    await navigateTo(body.data.url, {
+      external: true,
+    })
+  }
+}
+
 </script>
 
 <template>
@@ -26,6 +36,20 @@ import { Icon } from '@iconify/vue/dist/iconify.js';
             <NuxtLink href="/bookings">
               <span>Booking</span>
             </NuxtLink>
+            <div>
+              <Button v-if="useCookie(`token`).value" bg="bg-white">
+                <template #icon>
+                  <Icon icon="flat-color-icons:google" width="24" height="24" />
+                </template>
+                <template #text>Account</template>
+              </Button>
+              <Button v-else bg="bg-white" @click="handleLogin">
+                <template #icon>
+                  <Icon icon="flat-color-icons:google" width="24" height="24" />
+                </template>
+                <template #text>Masuk</template>
+              </Button>
+            </div>
           </div>
 
           <!-- Spacer -->

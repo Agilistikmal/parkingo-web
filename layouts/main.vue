@@ -7,6 +7,13 @@ useSeoMeta({
 }, {
   mode: "server"
 })
+
+const route = useRoute()
+if (route.query.token) {
+  const cookieToken = useCookie("token")
+  cookieToken.value = route.query.token as string
+  useRouter().replace(route.path)
+}
 </script>
 
 <template>
