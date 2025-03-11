@@ -35,8 +35,21 @@ const parking = ref({
   ],
   "created_at": "2025-03-07T12:00:00Z",
   "updated_at": "2025-03-07T12:30:00Z"
+})
+
+const config = useRuntimeConfig()
+
+const user = ref()
+
+const authStore = useAuthStore()
+if (authStore.isAuthenticated) {
+  user.value = await $fetch("/v1/users/me", {
+    baseURL: config.public.apiBase,
+    headers: {
+      "Authorization": "Bearer " + useCookie("token").value
+    }
+  })
 }
-)
 
 </script>
 
@@ -159,7 +172,8 @@ const parking = ref({
             <p class="text-sm text-white/70 italic">*Alamat email untuk mengirim invoice</p>
           </div>
           <div>
-            <input type="email" name="email" id="email" placeholder="user@email.com" class="w-full" required>
+            <input type="email" name="email" id="email" placeholder="user@email.com" class="w-full"
+              :value="user.data.email" required>
           </div>
         </label>
         <Button class="w-full mt-8">

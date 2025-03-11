@@ -45,7 +45,7 @@ useSeoMeta({
             Jl. Siliwangi Jl. Jombor Lor, Mlati Krajan, Sendangadi, Kec. Mlati, Kabupaten Sleman, Daerah Istimewa
             Yogyakarta 55284
           </p>
-          <NuxtLink href="/places/uty-1" class="mt-5 block">
+          <NuxtLink href="/p/uty-1" class="mt-5 block">
             <Button class="w-full">
               <template #text>Lihat Parkiran</template>
             </Button>
