@@ -1,16 +1,25 @@
 <script setup lang="ts">
 import { NuxtImg } from '#components';
 import { Icon } from '@iconify/vue/dist/iconify.js';
+import type { Auth } from '~/lib/types/auth';
+import type { Response } from '~/lib/types/response';
 
 async function handleLogin() {
-  const res = await fetch("https://parkingo-core.agil.zip/v1/authenticate?redirect_url=" + window.location.origin)
-  if (res.status == 200) {
-    const body = await res.json()
-    await navigateTo(body.data.url, {
+  const res: Response<Auth> = await $fetch("/v1/authenticate?redirect_url=" + window.location.origin, {
+    baseURL: useRuntimeConfig().public.apiBase
+  })
+  if (res.data) {
+    await navigateTo(res.data.url, {
       external: true,
     })
   }
 }
+
+async function handleLogout() {
+  useAuthStore().logout()
+}
+
+const currentUser = ref(await useAuthStore().getCurrentUser)
 
 </script>
 
@@ -29,7 +38,7 @@ async function handleLogin() {
         <!-- Desktop -->
         <div class="hidden md:flex items-center gap-2">
           <!-- Menu -->
-          <div class="flex items-center gap-4">
+          <div class="flex items-center gap-6">
             <NuxtLink href="/">
               <span>Beranda</span>
             </NuxtLink>
@@ -37,18 +46,20 @@ async function handleLogin() {
               <span>Booking</span>
             </NuxtLink>
             <div>
-              <Button v-if="useCookie(`token`).value" bg="bg-white">
-                <template #icon>
-                  <Icon icon="flat-color-icons:google" width="24" height="24" />
-                </template>
-                <template #text>Account</template>
-              </Button>
-              <Button v-else bg="bg-white" @click="handleLogin">
-                <template #icon>
-                  <Icon icon="flat-color-icons:google" width="24" height="24" />
-                </template>
-                <template #text>Masuk</template>
-              </Button>
+              <div v-if="useAuthStore().isAuthenticated" class="relative">
+                <NuxtLink href="/account" class="flex items-center gap-1">
+                  <Icon icon="solar:user-bold" width="24" height="24" />
+                  <p>{{ currentUser?.username }}</p>
+                </NuxtLink>
+              </div>
+              <div v-else>
+                <Button bg="bg-white" @click="handleLogin">
+                  <template #icon>
+                    <Icon icon="flat-color-icons:google" width="24" height="24" />
+                  </template>
+                  <template #text>Masuk</template>
+                </Button>
+              </div>
             </div>
           </div>
 
