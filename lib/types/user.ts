@@ -1,5 +1,5 @@
+import { toTypedSchema } from "@vee-validate/zod";
 import { z } from "zod";
-
 export type User = {
   id: number;
   username: string;
@@ -12,14 +12,14 @@ export type User = {
   deleted_at: string | null;
 };
 
-const CreateUserRequest = z.object({
-  username: z.string().min(3).max(50),
-  full_name: z.string().min(3).max(100),
-  email: z.string().email(),
-  google_id: z.string(),
-});
+export const CreateUserRequest = {
+  username: toTypedSchema(z.string().min(3).max(50)),
+  full_name: toTypedSchema(z.string().min(3).max(100)),
+  email: toTypedSchema(z.string().email()),
+  google_id: toTypedSchema(z.string()),
+};
 
-const UpdateUserRequest = z.object({
-  username: z.string().min(3).max(50),
-  full_name: z.string().min(3).max(100),
-});
+export const UpdateUserRequest = {
+  username: toTypedSchema(z.string().min(3).max(50)),
+  full_name: toTypedSchema(z.string().min(3).max(100)),
+};

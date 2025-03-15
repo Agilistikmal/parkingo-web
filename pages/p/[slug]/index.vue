@@ -3,6 +3,8 @@ import { NuxtLayout } from '#components';
 import { Icon } from '@iconify/vue'
 import type { Parking } from '~/lib/types/parking';
 import type { Response } from '~/lib/types/response';
+import { Field, Form, ErrorMessage } from 'vee-validate';
+import { CreateBookingRequest, UpdateBookingRequest } from '~/lib/types/booking';
 
 useSeoMeta({
   title: "Parkingo - UTY 1",
@@ -160,16 +162,45 @@ const openBookingMenu = ref(false)
         <!-- End Booking Button -->
 
         <!-- Booking Form -->
-        <div v-if="openBookingMenu" class="mt-5">
-          <div class="flex gap-5">
-            <div class="w-1/2">
-              <h4 class="font-semibold">Detail Parkir</h4>
-              <p class="text-white">Area Parkir: {{ parking.name }}</p>
-              <p class="text-white">Slot Parkir: {{ selected }}</p>
-            </div>
+        <div v-auto-animate>
+          <div v-if="openBookingMenu" class="mt-5">
+            <Form class="p-5 rounded-3xl bg-white/10 w-full max-w-xl">
+              <div class="text-center">
+                <h2>Form Booking</h2>
+                <h4>Slot Parkir {{ selected }}</h4>
+              </div>
+              <label for="plate_number">
+                <h4>Plat Nomor Kendaraan</h4>
+                <Field id="plate_number" name="plate_number" type="text" placeholder="KB 4 GIL"
+                  :rules="UpdateBookingRequest.plate_number" class="w-full" />
+                <br>
+                <ErrorMessage name="plate_number" class="text-sm italic text-red-200" />
+              </label>
+              <div>
+                <h4>Rentang Waktu</h4>
+                <div class="grid grid-cols-2 gap-2 w-full">
+                  <label for="start_at">
+                    <h5>Mulai</h5>
+                    <Field id="start_at" name="start_at" type="datetime-local" placeholder="user@email.com"
+                      :rules="UpdateBookingRequest.start_at" />
+                    <br>
+                    <ErrorMessage name="start_at" class="text-sm italic text-red-200" />
+                  </label>
+                  <label for="end_at">
+                    <h5>Selesai</h5>
+                    <Field id="end_at" name="end_at" type="datetime-local" placeholder="user@email.com"
+                      :rules="UpdateBookingRequest.end_at" />
+                    <br>
+                    <ErrorMessage name="end_at" class="text-sm italic text-red-200" />
+                  </label>
+                </div>
+              </div>
+              <Button class="w-full mt-5">
+                <template #text>Booking Sekarang</template>
+              </Button>
+            </Form>
           </div>
         </div>
-
         <!-- End Booking Form -->
       </div>
     </div>

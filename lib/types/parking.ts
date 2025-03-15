@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { User } from "./user";
+import { toTypedSchema } from "@vee-validate/zod";
 
 export type Parking = {
   id: number;
@@ -31,40 +32,42 @@ export type ParkingSlot = {
   deleted_at: string | null;
 };
 
-export const CreateParkingRequest = z.object({
-  slug: z.string().min(3).max(255),
-  name: z.string().min(3).max(255),
-  address: z.string().min(3).max(255),
-  latitude: z.number(),
-  longitude: z.number(),
-  layout: z.array(z.array(z.string())),
-});
+export const CreateParkingRequest = {
+  slug: toTypedSchema(z.string().min(3).max(255)),
+  name: toTypedSchema(z.string().min(3).max(255)),
+  address: toTypedSchema(z.string().min(3).max(255)),
+  latitude: toTypedSchema(z.number()),
+  longitude: toTypedSchema(z.number()),
+  layout: toTypedSchema(z.array(z.array(z.string()))),
+};
 
-export const UpdateParkingRequest = z.object({
-  slug: z.string().min(3).max(255),
-  name: z.string().min(3).max(255),
-  address: z.string().min(3).max(255),
-  latitude: z.number(),
-  longitude: z.number(),
-  layout: z.array(z.array(z.string())),
-});
+export const UpdateParkingRequest = {
+  slug: toTypedSchema(z.string().min(3).max(255)),
+  name: toTypedSchema(z.string().min(3).max(255)),
+  address: toTypedSchema(z.string().min(3).max(255)),
+  latitude: toTypedSchema(z.number()),
+  longitude: toTypedSchema(z.number()),
+  layout: toTypedSchema(z.array(z.array(z.string()))),
+};
 
-export const CreateParkingSlotRequest = z.object({
-  parking_id: z.number(),
-  name: z.string().min(1).max(8),
-  fee: z.number().min(0),
-  row: z.number(),
-  col: z.number(),
-});
+export const CreateParkingSlotRequest = {
+  parking_id: toTypedSchema(z.number()),
+  name: toTypedSchema(z.string().min(1).max(8)),
+  fee: toTypedSchema(z.number().min(0)),
+  row: toTypedSchema(z.number()),
+  col: toTypedSchema(z.number()),
+};
 
-export const UpdateParkingSlotRequest = z.object({
-  name: z.string().min(1).max(8),
-  status: z.nativeEnum({
-    AVAILABLE: "AVAILABLE",
-    BOOKED: "BOOKED",
-    OCCUPIED: "OCCUPIED",
-  }),
-  fee: z.number().min(0),
-  row: z.number(),
-  col: z.number(),
-});
+export const UpdateParkingSlotRequest = {
+  name: toTypedSchema(z.string().min(1).max(8)),
+  status: toTypedSchema(
+    z.nativeEnum({
+      AVAILABLE: "AVAILABLE",
+      BOOKED: "BOOKED",
+      OCCUPIED: "OCCUPIED",
+    })
+  ),
+  fee: toTypedSchema(z.number().min(0)),
+  row: toTypedSchema(z.number()),
+  col: toTypedSchema(z.number()),
+};
