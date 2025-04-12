@@ -4,7 +4,7 @@ import { Icon } from '@iconify/vue'
 import type { Parking } from '~/lib/types/parking';
 import type { Response } from '~/lib/types/response';
 import { Field, Form, ErrorMessage } from 'vee-validate';
-import { CreateBookingRequest, UpdateBookingRequest } from '~/lib/types/booking';
+import { CreateBookingRequest, UpdateBookingRequest, type Booking } from '~/lib/types/booking';
 
 useSeoMeta({
   title: "Parkingo - UTY 1",
@@ -35,11 +35,11 @@ parking.value = res.data
 
 const config = useRuntimeConfig()
 
-const user = ref()
+const currentUser = ref()
 
 const authStore = useAuthStore()
 if (authStore.isAuthenticated) {
-  user.value = await $fetch("/v1/users/me", {
+  currentUser.value = await $fetch("/v1/users/me", {
     baseURL: config.public.apiBase,
     headers: {
       "Authorization": "Bearer " + useCookie("token").value
@@ -49,6 +49,34 @@ if (authStore.isAuthenticated) {
 
 const selected = ref();
 const openBookingMenu = ref(false)
+
+async function handleBooking(e: any) {
+  const form = e.target as HTMLFormElement
+  const formData = new FormData(form)
+  const data = Object.fromEntries(formData.entries())
+
+  const req = {
+    ...data,
+    parking_id: parking.value?.id,
+    slot_id: selected.value
+  }
+  const res: Response<Booking> = await $fetch("/v1/bookings", {
+    method: "POST",
+    baseURL: config.public.apiBase,
+    headers: {
+      "Authorization": "Bearer " + useAuthStore().token
+    },
+    data: req
+  })
+
+  if (res.data) {
+    openBookingMenu.value = false
+    form.reset()
+    selected.value = null
+    alert("Booking berhasil")
+  }
+
+}
 
 // [
 //   ["EMPTY", "P", "P", "DOOR", "P", "P", "P", "P", "EMPTY"],
@@ -164,7 +192,7 @@ const openBookingMenu = ref(false)
         <!-- Booking Form -->
         <div v-auto-animate>
           <div v-if="openBookingMenu" class="mt-5">
-            <Form class="p-5 rounded-3xl bg-white/10 w-full max-w-xl">
+            <Form class="p-5 rounded-3xl bg-white/10 w-full max-w-xl" @submit.prevent="handleBooking">
               <div class="text-center">
                 <h2>Form Booking</h2>
                 <h4>Slot Parkir {{ selected }}</h4>

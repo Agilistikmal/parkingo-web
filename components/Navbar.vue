@@ -1,23 +1,6 @@
 <script setup lang="ts">
 import { NuxtImg } from '#components';
 import { Icon } from '@iconify/vue/dist/iconify.js';
-import type { Auth } from '~/lib/types/auth';
-import type { Response } from '~/lib/types/response';
-
-async function handleLogin() {
-  const res: Response<Auth> = await $fetch("/v1/authenticate?redirect_url=" + window.location.origin, {
-    baseURL: useRuntimeConfig().public.apiBase
-  })
-  if (res.data) {
-    await navigateTo(res.data.url, {
-      external: true,
-    })
-  }
-}
-
-async function handleLogout() {
-  useAuthStore().logout()
-}
 
 const currentUser = ref(await useAuthStore().getCurrentUser)
 
@@ -42,23 +25,23 @@ const currentUser = ref(await useAuthStore().getCurrentUser)
             <NuxtLink href="/">
               <span>Beranda</span>
             </NuxtLink>
-            <NuxtLink href="/bookings">
+            <NuxtLink href="/d/bookings">
               <span>Booking</span>
             </NuxtLink>
             <div>
               <div v-if="useAuthStore().isAuthenticated" class="relative">
-                <NuxtLink href="/account" class="flex items-center gap-1">
+                <NuxtLink href="/d/account" class="flex items-center gap-1">
                   <Icon icon="solar:user-bold" width="24" height="24" />
                   <p>{{ currentUser?.username }}</p>
                 </NuxtLink>
               </div>
               <div v-else>
-                <Button bg="bg-white" @click="handleLogin">
+                <NuxtLink href="/auth/login" bg="bg-white">
                   <template #icon>
                     <Icon icon="flat-color-icons:google" width="24" height="24" />
                   </template>
                   <template #text>Masuk</template>
-                </Button>
+                </NuxtLink>
               </div>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import type { Response } from "~/lib/types/response";
 import type { User } from "~/lib/types/user";
+import { useRouter } from "vue-router";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -8,6 +9,10 @@ export const useAuthStore = defineStore("auth", {
   getters: {
     isAuthenticated: (state) => !!state.token,
     getCurrentUser: async (state) => {
+      if (!state.token) {
+        return null;
+      }
+
       const res: Response<User> = await $fetch("/v1/users/me", {
         baseURL: useRuntimeConfig().public.apiBase,
         headers: {
