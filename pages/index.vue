@@ -41,7 +41,7 @@ useSeoMeta({
                 <template #text>Cari Parkiran</template>
               </Button>
             </NuxtLink>
-            <NuxtLink href="/bookings">
+            <NuxtLink href="/d/bookings">
               <Button class="mt-2" bg="bg-accent/5" color="text-white">
                 <template #icon>
                   <Icon icon="mdi:car-search" width="24" height="24" />

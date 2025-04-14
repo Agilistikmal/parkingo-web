@@ -13,13 +13,17 @@ export const useAuthStore = defineStore("auth", {
         return null;
       }
 
-      const res: Response<User> = await $fetch("/v1/users/me", {
-        baseURL: useRuntimeConfig().public.apiBase,
-        headers: {
-          Authorization: "Bearer " + state.token,
-        },
-      });
-      return res.data;
+      try {
+        const res: Response<User> = await $fetch("/v1/users/me", {
+          baseURL: useRuntimeConfig().public.apiBase,
+          headers: {
+            Authorization: "Bearer " + state.token,
+          },
+        });
+        return res.data;
+      } catch (error) {
+        return null;
+      }
     },
   },
   actions: {

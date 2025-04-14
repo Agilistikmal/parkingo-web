@@ -2,7 +2,12 @@
 import { NuxtImg } from '#components';
 import { Icon } from '@iconify/vue/dist/iconify.js';
 
-const currentUser = ref(await useAuthStore().getCurrentUser)
+const currentUser = ref()
+
+onMounted(async () => {
+  const user = await useAuthStore().getCurrentUser
+  currentUser.value = user
+})
 
 </script>
 
@@ -29,18 +34,20 @@ const currentUser = ref(await useAuthStore().getCurrentUser)
               <span>Booking</span>
             </NuxtLink>
             <div>
-              <div v-if="useAuthStore().isAuthenticated" class="relative">
+              <div v-if="currentUser" class="relative">
                 <NuxtLink href="/d/account" class="flex items-center gap-1">
                   <Icon icon="solar:user-bold" width="24" height="24" />
-                  <p>{{ currentUser?.username }}</p>
+                  <p>{{ currentUser.username }}</p>
                 </NuxtLink>
               </div>
               <div v-else>
                 <NuxtLink href="/auth/login" bg="bg-white">
-                  <template #icon>
-                    <Icon icon="flat-color-icons:google" width="24" height="24" />
-                  </template>
-                  <template #text>Masuk</template>
+                  <Button bg="bg-white">
+                    <template #icon>
+                      <Icon icon="flat-color-icons:google" width="24" height="24" />
+                    </template>
+                    <template #text>Masuk</template>
+                  </Button>
                 </NuxtLink>
               </div>
             </div>

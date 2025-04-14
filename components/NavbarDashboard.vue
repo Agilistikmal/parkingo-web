@@ -15,22 +15,22 @@ const userMenus = [
   },
   {
     name: "Riwayat Booking",
-    href: "/bookings"
+    href: "/d/bookings"
   },
   {
     name: "Akun",
-    href: "/account"
+    href: "/d/account"
   }
 ]
 
 const adminMenus = [
   {
     name: "Area Parkir Saya",
-    href: "/parking"
+    href: "/d/parking"
   },
   {
     name: "Riwayat Booking Parkiran",
-    href: "/bookings"
+    href: "/d/parking/bookings"
   },
 ]
 
