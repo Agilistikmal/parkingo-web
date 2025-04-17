@@ -1,6 +1,15 @@
 <script setup lang="ts">
 import { Icon } from '@iconify/vue/dist/iconify.js';
+import type { Parking } from '~/lib/types/parking';
+import type { Response } from '~/lib/types/response';
 
+const parkings = ref<Parking[] | null>()
+onMounted(async () => {
+  const res: Response<Parking[]> = await $fetch('/v1/parkings', {
+    baseURL: useRuntimeConfig().public.apiBase
+  })
+  parkings.value = res.data
+})
 </script>
 
 <template>
@@ -23,9 +32,21 @@ import { Icon } from '@iconify/vue/dist/iconify.js';
       </NuxtLink>
     </div>
 
-    <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      <div class="p-5 rounded-3xl bg-white/10 aspect-video">
-        <h4>Parkir UTY 1</h4>
+    <!-- Places -->
+    <div class="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+      <div class="p-5 rounded-3xl bg-white/5" v-for="parking in parkings">
+        <iframe :src="`https://maps.google.com/maps?q=${parking.latitude},${parking.longitude}&z=15&output=embed`"
+          style="border:0;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+          class="w-full rounded-xl"></iframe>
+        <h4 class="font-semibold mt-2">{{ parking.name }}</h4>
+        <p class="text-white/70">
+          {{ parking.address }}
+        </p>
+        <NuxtLink :href="`/d/parking/${parking.slug}`" class="mt-5 block">
+          <Button class="w-full">
+            <template #text>Lihat Parkiran</template>
+          </Button>
+        </NuxtLink>
       </div>
     </div>
   </NuxtLayout>

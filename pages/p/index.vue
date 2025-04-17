@@ -23,10 +23,12 @@ useSeoMeta({
 })
 
 const parkings = ref<Parking[] | null>()
-const res: Response<Parking[]> = await $fetch('/v1/parkings', {
-  baseURL: useRuntimeConfig().public.apiBase
+onMounted(async () => {
+  const res: Response<Parking[]> = await $fetch('/v1/parkings', {
+    baseURL: useRuntimeConfig().public.apiBase
+  })
+  parkings.value = res.data
 })
-parkings.value = res.data
 
 </script>
 
@@ -41,7 +43,7 @@ parkings.value = res.data
       </div>
 
       <!-- Places -->
-      <div class="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+      <div class="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
         <div class="p-5 rounded-3xl bg-white/5" v-for="parking in parkings">
           <iframe :src="`https://maps.google.com/maps?q=${parking.latitude},${parking.longitude}&z=15&output=embed`"
             style="border:0;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"
