@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { NuxtLayout } from '#components';
-import { Icon } from '@iconify/vue'
 import type { Parking } from '~/lib/types/parking';
 import type { Response } from '~/lib/types/response';
 
@@ -44,8 +43,7 @@ parkings.value = res.data
       <!-- Places -->
       <div class="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         <div class="p-5 rounded-3xl bg-white/5" v-for="parking in parkings">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d5574.909268594812!2d110.3554162!3d-7.7475128!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a588b69ee62ad%3A0x1b03de2cbc7b2bcb!2sKampus%201%20UTY!5e1!3m2!1sid!2sid!4v1740834653650!5m2!1sid!2sid"
+          <iframe :src="`https://maps.google.com/maps?q=${parking.latitude},${parking.longitude}&z=15&output=embed`"
             style="border:0;" allowfullscreen loading="lazy" referrerpolicy="no-referrer-when-downgrade"
             class="w-full rounded-xl"></iframe>
           <h4 class="font-semibold mt-2">{{ parking.name }}</h4>

@@ -6,6 +6,9 @@ import { CreateParkingRequest, type Parking } from '~/lib/types/parking';
 import type { Response } from '~/lib/types/response';
 import { slugify } from '~/lib/utils/slugify';
 
+const errors = ref();
+const loading = ref(false);
+
 const autoComplete = ref<VNodeRef | null>(null)!
 
 const selectedAddress = ref({
@@ -64,21 +67,32 @@ onMounted(async () => {
 })
 
 async function handleCreateForm(values: any) {
-    const res: Response<Parking> = await $fetch("/v1/parkings", {
-        baseURL: useRuntimeConfig().public.apiBase,
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer " + useAuthStore().token,
-        },
-        body: {
-            ...values,
-            layout: layoutRef.value.getLayout(),
+    loading.value = true
+    try {
+        const res: Response<Parking> = await $fetch("/v1/parkings", {
+            baseURL: useRuntimeConfig().public.apiBase,
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + useAuthStore().token,
+            },
+            body: {
+                ...selectedAddress.value,
+                layout: layoutRef.value.getLayout(),
+            }
+        })
+
+        if (res.data) {
+            console.log(res.data)
         }
-    })
-    if (res.data) {
-        console.log(res.data)
+    } catch (err: any) {
+        if (err.response?._data) {
+            errors.value = err.response._data.errors
+        } else {
+            errors.value = err.message
+        }
     }
+    loading.value = false
 };
 </script>
 
@@ -139,8 +153,11 @@ async function handleCreateForm(values: any) {
                     <ParkingGridEditor ref="layoutRef" />
                 </div>
             </div>
+
+            <div v-if="errors">{{ errors }}</div>
             <Button class="w-full mt-5">
-                <template #text>Simpan</template>
+                <template #text v-if="loading">Loading...</template>
+                <template #text v-else>Simpan</template>
             </Button>
         </Form>
     </NuxtLayout>
