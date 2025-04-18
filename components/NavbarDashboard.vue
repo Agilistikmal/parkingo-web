@@ -26,11 +26,11 @@ const userMenus = [
 const adminMenus = [
   {
     name: "Area Parkir Saya",
-    href: "/d/parking"
+    href: "/d/parkings"
   },
   {
     name: "Riwayat Booking Parkiran",
-    href: "/d/parking/bookings"
+    href: "/d/parkings/bookings"
   },
 ]
 

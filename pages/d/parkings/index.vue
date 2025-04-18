@@ -22,7 +22,7 @@ onMounted(async () => {
 
     <div class="flex items-center gap-2 w-full">
       <div class="px-5 py-1 rounded-lg bg-white/10 w-max my-2 mx-auto md:mx-0 flex-grow" />
-      <NuxtLink href="/d/parking/create">
+      <NuxtLink href="/d/parkings/create">
         <Button bg="bg-white/10" color="text-white">
           <template #icon>
             <Icon icon="mdi:plus" width="24" height="24" />
@@ -42,7 +42,7 @@ onMounted(async () => {
         <p class="text-white/70">
           {{ parking.address }}
         </p>
-        <NuxtLink :href="`/d/parking/${parking.slug}`" class="mt-5 block">
+        <NuxtLink :href="`/d/parkings/${parking.slug}`" class="mt-5 block">
           <Button class="w-full">
             <template #text>Lihat Parkiran</template>
           </Button>
