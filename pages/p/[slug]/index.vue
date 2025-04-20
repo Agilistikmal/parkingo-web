@@ -62,10 +62,19 @@ const selected = ref();
 const openBookingMenu = ref(false)
 
 const startAt = ref(new Date().toISOString().slice(0, 16))
+const totalHours = ref(3)
 const endAtTemp = ref(new Date())
-endAtTemp.value.setHours(endAtTemp.value.getHours() + 3)
 const endAt = ref(endAtTemp.value.toISOString().slice(0, 16))
+endAtTemp.value.setHours(endAtTemp.value.getHours() + totalHours.value)
+endAt.value = endAtTemp.value.toISOString().slice(0, 16)
 
+watch([startAt, totalHours], () => {
+  endAtTemp.value = new Date(startAt.value)
+  endAtTemp.value.setHours(endAtTemp.value.getHours() + totalHours.value)
+  endAt.value = endAtTemp.value.toISOString().slice(0, 16)
+})
+
+const booking = ref<Booking | null>(null)
 async function handleBooking(values: any) {
   const req = {
     ...values,
@@ -84,10 +93,8 @@ async function handleBooking(values: any) {
   })
 
   if (res.data) {
-    openBookingMenu.value = false
-    selected.value = null
-    console.log(res.data)
-    alert("Booking berhasil")
+    booking.value = res.data
+    await navigateTo(res.data.payment_link, { external: true, open: { target: "_blank" } })
   }
 
 }
@@ -108,77 +115,133 @@ async function handleBooking(values: any) {
         </div>
         <!-- End Hero -->
 
-        <div v-auto-animate>
+        <div class="grid grid-cols-1 md:grid-cols-2">
 
-          <!-- Parking Layout -->
-          <div v-if="!openBookingMenu" class="mt-5 flex flex-col bg-black w-full overflow-x-scroll">
-            <div v-for="(row, indexRow) in parking.layout" class="flex">
-              <div v-for="(col, indexCol) in row">
-                <button v-if="col == `P`" :class="[
-                  'block relative w-16 aspect-square p-1 cursor-pointer',
-                  selected == `${indexRow}-${indexCol}` ? 'bg-accent/70' :
-                    (slots[`${indexRow}-${indexCol}`].status == 'BOOKED' ? 'bg-brand' :
-                      (slots[`${indexRow}-${indexCol}`].status == 'OCCUPIED' ? 'bg-red-500' : 'bg-white/10'))
-                ]" :disabled="slots[`${indexRow}-${indexCol}`].status !== 'AVAILABLE'"
-                  @click="selected = `${indexRow}-${indexCol}`">
-                  <div
-                    class="border-4 border-white/25 text-white/70 border-dotted w-full h-full mx-auto text-center flex items-center gap-2">
-                    <div class="mx-auto">
-                      <Icon icon="mdi:parking" width="24" height="24" />
-                      <div class="text-xs text-white/50 absolute left-0 bottom-2 mx-auto w-full">
-                        <span>{{ indexRow }}{{ indexCol }}</span>
+          <div v-auto-animate>
+            <!-- Parking Layout -->
+            <div class="mt-5 flex flex-col bg-black w-full overflow-x-scroll">
+              <div v-for="(row, indexRow) in parking.layout" class="flex">
+                <div v-for="(col, indexCol) in row">
+                  <button v-if="col == `P`" :class="[
+                    'block relative w-16 aspect-square p-1 cursor-pointer',
+                    selected == `${indexRow}-${indexCol}` ? 'bg-accent/70' :
+                      (slots[`${indexRow}-${indexCol}`].status == 'BOOKED' ? 'bg-brand' :
+                        (slots[`${indexRow}-${indexCol}`].status == 'OCCUPIED' ? 'bg-red-500' : 'bg-white/10'))
+                  ]" :disabled="slots[`${indexRow}-${indexCol}`].status !== 'AVAILABLE'"
+                    @click="selected = `${indexRow}-${indexCol}`">
+                    <div
+                      class="border-4 border-white/25 text-white/70 border-dotted w-full h-full mx-auto text-center flex items-center gap-2">
+                      <div class="mx-auto">
+                        <Icon icon="mdi:parking" width="24" height="24" />
+                        <div class="text-xs text-white/50 absolute left-0 bottom-2 mx-auto w-full">
+                          <span>{{ indexRow }}{{ indexCol }}</span>
+                        </div>
                       </div>
                     </div>
+                  </button>
+                  <div v-if="col == `EMPTY`"
+                    :class="`w-16 aspect-square text-center bg-transparent flex items-center gap-2`">
                   </div>
-                </button>
-                <div v-if="col == `EMPTY`"
-                  :class="`w-16 aspect-square text-center bg-transparent flex items-center gap-2`">
-                </div>
-                <div v-if="col == `ROAD`" :class="`w-16 aspect-square text-center bg-white/10 flex items-center gap-2`">
-                </div>
-                <div v-if="col == `IN`"
-                  :class="`w-16 aspect-square text-center bg-green-200 text-green-500 font-semibold flex items-center gap-2`">
-                  <div class="mx-auto">
-                    {{ col }}
+                  <div v-if="col == `ROAD`"
+                    :class="`w-16 aspect-square text-center bg-white/10 flex items-center gap-2`">
+                  </div>
+                  <div v-if="col == `IN`"
+                    :class="`w-16 aspect-square text-center bg-green-200 text-green-500 font-semibold flex items-center gap-2`">
+                    <div class="mx-auto">
+                      {{ col }}
+                    </div>
+                  </div>
+                  <div v-if="col == `DOOR`"
+                    :class="`w-16 aspect-square text-center bg-green-500 text-green-200 font-semibold flex items-center gap-2`">
+                    <div class="mx-auto">
+                      {{ col }}
+                    </div>
+                  </div>
+                  <div v-if="col == `EXIT`"
+                    :class="`w-16 aspect-square text-center bg-red-200 text-red-500 font-semibold flex items-center gap-2`">
+                    <div class="mx-auto">
+                      {{ col }}
+                    </div>
                   </div>
                 </div>
-                <div v-if="col == `DOOR`"
-                  :class="`w-16 aspect-square text-center bg-green-500 text-green-200 font-semibold flex items-center gap-2`">
-                  <div class="mx-auto">
-                    {{ col }}
+              </div>
+
+              <div class="my-5">
+                <div class="flex gap-8 text-sm">
+                  <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 bg-white/10"></div>
+                    <p>Available</p>
                   </div>
-                </div>
-                <div v-if="col == `EXIT`"
-                  :class="`w-16 aspect-square text-center bg-red-200 text-red-500 font-semibold flex items-center gap-2`">
-                  <div class="mx-auto">
-                    {{ col }}
+                  <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 bg-accent"></div>
+                    <p>Selected</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 bg-brand"></div>
+                    <p>Booked</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <div class="w-5 h-5 bg-red-500"></div>
+                    <p class="text-nowrap">Not Available</p>
                   </div>
                 </div>
               </div>
             </div>
+            <!-- End Parking Layout -->
+          </div>
 
-            <div class="my-5">
-              <div class="flex gap-8 text-sm">
-                <div class="flex items-center gap-2">
-                  <div class="w-5 h-5 bg-white/10"></div>
-                  <p>Available</p>
+          <!-- Booking Form -->
+          <div v-auto-animate>
+            <div v-if="openBookingMenu" class="mt-5">
+              <Form class="p-5 rounded-3xl bg-white/10 w-full max-w-xl" @submit="handleBooking">
+                <div class="text-center">
+                  <h2>Form Booking</h2>
+                  <h4>Slot Parkir <span class="font-bold text-brand">{{ slots[selected].name }}</span></h4>
                 </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-5 h-5 bg-accent"></div>
-                  <p>Selected</p>
-                </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-5 h-5 bg-brand"></div>
-                  <p>Booked</p>
-                </div>
-                <div class="flex items-center gap-2">
-                  <div class="w-5 h-5 bg-red-500"></div>
-                  <p class="text-nowrap">Not Available</p>
-                </div>
-              </div>
+                <label for="plate_number">
+                  <h4>Plat Nomor Kendaraan</h4>
+                  <Field id="plate_number" name="plate_number" type="text" placeholder="KB 4 GIL"
+                    :rules="CreateBookingRequest.plate_number" class="w-full" />
+                  <br>
+                  <ErrorMessage name="plate_number" class="text-sm italic text-red-200" />
+                </label>
+                <label for="start_at">
+                  <h4>Waktu Masuk</h4>
+                  <Field id="start_at" name="start_at" type="datetime-local" placeholder="user@email.com"
+                    v-model="startAt" class="w-full" />
+                  <br>
+                  <ErrorMessage name="start_at" class="text-sm italic text-red-200" />
+                </label>
+                <label for="total_hours">
+                  <h4>Berapa Jam?</h4>
+                  <Field id="total_hours" name="total_hours" as="select" class="w-full" v-model="totalHours">
+                    <option value="3">3 Jam</option>
+                    <option value="4">4 Jam</option>
+                    <option value="5">5 Jam</option>
+                    <option value="6">6 Jam</option>
+                  </Field>
+                  <br>
+                  <ErrorMessage name="total_hours" class="text-sm italic text-red-200" />
+                </label>
+                <label for="end_at" hidden>
+                  <h4>Waktu Selesai</h4>
+                  <Field id="end_at" name="end_at" type="datetime-local" placeholder="user@email.com" v-model="endAt"
+                    class="w-full" readonly />
+                  <br>
+                  <ErrorMessage name="end_at" class="text-sm italic text-red-200" />
+                </label>
+
+                <p class="mt-2 italic text-white/70">*Biaya Rp{{ Intl.NumberFormat("id-ID").format(slots[selected].fee)
+                  }}/jam</p>
+
+                <Button class="w-full mt-5">
+                  <template #text>Booking Sekarang Rp{{ Intl.NumberFormat("id-ID").format(slots[selected].fee *
+                    totalHours) }}</template>
+                </Button>
+              </Form>
             </div>
           </div>
-          <!-- End Parking Layout -->
+          <!-- End Booking Form -->
         </div>
 
         <!-- Booking Button -->
@@ -191,55 +254,13 @@ async function handleBooking(values: any) {
             <template #text>
               <div v-auto-animate>
                 <p v-if="!openBookingMenu">Lanjut Booking Rp{{ Intl.NumberFormat("id-ID").format(slots[selected].fee)
-                  }}/jam</p>
+                }}/jam</p>
                 <p v-else>Kembali</p>
               </div>
             </template>
           </Button>
         </div>
         <!-- End Booking Button -->
-
-        <!-- Booking Form -->
-        <div v-auto-animate>
-          <div v-if="openBookingMenu" class="mt-5">
-            <Form class="p-5 rounded-3xl bg-white/10 w-full max-w-xl" @submit="handleBooking">
-              <div class="text-center">
-                <h2>Form Booking</h2>
-                <h4>Slot Parkir <span class="font-bold text-brand">{{ slots[selected].name }}</span></h4>
-              </div>
-              <label for="plate_number">
-                <h4>Plat Nomor Kendaraan</h4>
-                <Field id="plate_number" name="plate_number" type="text" placeholder="KB 4 GIL"
-                  :rules="CreateBookingRequest.plate_number" class="w-full" />
-                <br>
-                <ErrorMessage name="plate_number" class="text-sm italic text-red-200" />
-              </label>
-              <div>
-                <h4>Rentang Waktu</h4>
-                <div class="grid grid-cols-2 gap-2 w-full">
-                  <label for="start_at">
-                    <h5>Mulai</h5>
-                    <Field id="start_at" name="start_at" type="datetime-local" placeholder="user@email.com"
-                      v-model="startAt" />
-                    <br>
-                    <ErrorMessage name="start_at" class="text-sm italic text-red-200" />
-                  </label>
-                  <label for="end_at">
-                    <h5>Selesai</h5>
-                    <Field id="end_at" name="end_at" type="datetime-local" placeholder="user@email.com"
-                      v-model="endAt" />
-                    <br>
-                    <ErrorMessage name="end_at" class="text-sm italic text-red-200" />
-                  </label>
-                </div>
-              </div>
-              <Button class="w-full mt-5">
-                <template #text>Booking Sekarang</template>
-              </Button>
-            </Form>
-          </div>
-        </div>
-        <!-- End Booking Form -->
       </div>
     </div>
 
