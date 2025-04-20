@@ -44,6 +44,14 @@ onMounted(async () => {
         </p>
         <NuxtLink :href="`/d/parkings/${parking.slug}`" class="mt-5 block">
           <Button class="w-full">
+            <template #text>Edit Parkiran</template>
+          </Button>
+        </NuxtLink>
+        <NuxtLink :href="`/p/${parking.slug}`" class="mt-2 block">
+          <Button class="w-full" bg="bg-white/10" color="text-white">
+            <template #icon>
+              <Icon icon="mdi:external-link" width="24" height="24" />
+            </template>
             <template #text>Lihat Parkiran</template>
           </Button>
         </NuxtLink>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { NuxtLayout } from '#components';
 import { Icon } from '@iconify/vue'
-import type { Parking } from '~/lib/types/parking';
+import type { Parking, ParkingSlot } from '~/lib/types/parking';
 import type { Response } from '~/lib/types/response';
 import { Field, Form, ErrorMessage } from 'vee-validate';
 import { CreateBookingRequest, UpdateBookingRequest, type Booking } from '~/lib/types/booking';
@@ -28,10 +28,21 @@ useSeoMeta({
 const route = useRoute()
 
 const parking = ref<Parking | null>()
-const res: Response<Parking> = await $fetch(`/v1/parkings/slug/${route.params.slug}`, {
-  baseURL: useRuntimeConfig().public.apiBase
+
+const slots = ref<{ [key: string]: ParkingSlot }>({})
+
+onMounted(async () => {
+  const res: Response<Parking> = await $fetch(`/v1/parkings/slug/${route.params.slug}`, {
+    baseURL: useRuntimeConfig().public.apiBase
+  })
+  if (res.data) {
+    parking.value = res.data
+
+    for (const slot of res.data.slots) {
+      slots.value[`${slot.row}-${slot.col}`] = slot
+    }
+  }
 })
-parking.value = res.data
 
 const config = useRuntimeConfig()
 
@@ -50,15 +61,18 @@ if (authStore.isAuthenticated) {
 const selected = ref();
 const openBookingMenu = ref(false)
 
-async function handleBooking(e: any) {
-  const form = e.target as HTMLFormElement
-  const formData = new FormData(form)
-  const data = Object.fromEntries(formData.entries())
+const startAt = ref(new Date().toISOString().slice(0, 16))
+const endAtTemp = ref(new Date())
+endAtTemp.value.setHours(endAtTemp.value.getHours() + 3)
+const endAt = ref(endAtTemp.value.toISOString().slice(0, 16))
 
+async function handleBooking(values: any) {
   const req = {
-    ...data,
+    ...values,
     parking_id: parking.value?.id,
-    slot_id: selected.value
+    slot_id: slots.value[selected.value].id,
+    start_at: new Date(values.start_at).toISOString(),
+    end_at: new Date(values.end_at).toISOString(),
   }
   const res: Response<Booking> = await $fetch("/v1/bookings", {
     method: "POST",
@@ -66,26 +80,17 @@ async function handleBooking(e: any) {
     headers: {
       "Authorization": "Bearer " + useAuthStore().token
     },
-    data: req
+    body: req
   })
 
   if (res.data) {
     openBookingMenu.value = false
-    form.reset()
     selected.value = null
+    console.log(res.data)
     alert("Booking berhasil")
   }
 
 }
-
-// [
-//   ["EMPTY", "P", "P", "DOOR", "P", "P", "P", "P", "EMPTY"],
-//   ["EMPTY", "ROAD", "ROAD", "ROAD", "ROAD", "ROAD", "ROAD", "ROAD", "EXIT"],
-//   ["EMPTY", "ROAD", "P", "P", "ROAD", "P", "P", "ROAD", "P"],
-//   ["IN", "ROAD", "ROAD", "ROAD", "ROAD", "P", "P", "ROAD", "P"],
-//   ["EMPTY", "P", "P", "P", "ROAD", "ROAD", "ROAD", "ROAD", "P"],
-// ]
-
 </script>
 
 <template>
@@ -109,15 +114,19 @@ async function handleBooking(e: any) {
           <div v-if="!openBookingMenu" class="mt-5 flex flex-col bg-black w-full overflow-x-scroll">
             <div v-for="(row, indexRow) in parking.layout" class="flex">
               <div v-for="(col, indexCol) in row">
-                <button v-if="col == `P`"
-                  :class="`block relative w-16 aspect-square ${selected == `${indexRow}-${indexCol}` ? `bg-accent/70` : `bg-white/10`} p-1 cursor-pointer`"
+                <button v-if="col == `P`" :class="[
+                  'block relative w-16 aspect-square p-1 cursor-pointer',
+                  selected == `${indexRow}-${indexCol}` ? 'bg-accent/70' :
+                    (slots[`${indexRow}-${indexCol}`].status == 'BOOKED' ? 'bg-brand' :
+                      (slots[`${indexRow}-${indexCol}`].status == 'OCCUPIED' ? 'bg-red-500' : 'bg-white/10'))
+                ]" :disabled="slots[`${indexRow}-${indexCol}`].status !== 'AVAILABLE'"
                   @click="selected = `${indexRow}-${indexCol}`">
                   <div
                     class="border-4 border-white/25 text-white/70 border-dotted w-full h-full mx-auto text-center flex items-center gap-2">
                     <div class="mx-auto">
                       <Icon icon="mdi:parking" width="24" height="24" />
                       <div class="text-xs text-white/50 absolute left-0 bottom-2 mx-auto w-full">
-                        <span>{{ indexRow }}-{{ indexCol }}</span>
+                        <span>{{ indexRow }}{{ indexCol }}</span>
                       </div>
                     </div>
                   </div>
@@ -181,7 +190,8 @@ async function handleBooking(e: any) {
             </template>
             <template #text>
               <div v-auto-animate>
-                <p v-if="!openBookingMenu">Lanjut Booking</p>
+                <p v-if="!openBookingMenu">Lanjut Booking Rp{{ Intl.NumberFormat("id-ID").format(slots[selected].fee)
+                  }}/jam</p>
                 <p v-else>Kembali</p>
               </div>
             </template>
@@ -192,15 +202,15 @@ async function handleBooking(e: any) {
         <!-- Booking Form -->
         <div v-auto-animate>
           <div v-if="openBookingMenu" class="mt-5">
-            <Form class="p-5 rounded-3xl bg-white/10 w-full max-w-xl" @submit.prevent="handleBooking">
+            <Form class="p-5 rounded-3xl bg-white/10 w-full max-w-xl" @submit="handleBooking">
               <div class="text-center">
                 <h2>Form Booking</h2>
-                <h4>Slot Parkir {{ selected }}</h4>
+                <h4>Slot Parkir <span class="font-bold text-brand">{{ slots[selected].name }}</span></h4>
               </div>
               <label for="plate_number">
                 <h4>Plat Nomor Kendaraan</h4>
                 <Field id="plate_number" name="plate_number" type="text" placeholder="KB 4 GIL"
-                  :rules="UpdateBookingRequest.plate_number" class="w-full" />
+                  :rules="CreateBookingRequest.plate_number" class="w-full" />
                 <br>
                 <ErrorMessage name="plate_number" class="text-sm italic text-red-200" />
               </label>
@@ -210,14 +220,14 @@ async function handleBooking(e: any) {
                   <label for="start_at">
                     <h5>Mulai</h5>
                     <Field id="start_at" name="start_at" type="datetime-local" placeholder="user@email.com"
-                      :rules="UpdateBookingRequest.start_at" />
+                      v-model="startAt" />
                     <br>
                     <ErrorMessage name="start_at" class="text-sm italic text-red-200" />
                   </label>
                   <label for="end_at">
                     <h5>Selesai</h5>
                     <Field id="end_at" name="end_at" type="datetime-local" placeholder="user@email.com"
-                      :rules="UpdateBookingRequest.end_at" />
+                      v-model="endAt" />
                     <br>
                     <ErrorMessage name="end_at" class="text-sm italic text-red-200" />
                   </label>

@@ -28,14 +28,14 @@ export const CreateBookingRequest = {
   parking_id: toTypedSchema(z.number()),
   slot_id: toTypedSchema(z.number()),
   plate_number: toTypedSchema(z.string().min(3).max(16)),
-  start_at: toTypedSchema(z.string().datetime()),
-  end_at: toTypedSchema(z.string().datetime()),
+  start_at: toTypedSchema(z.string().datetime({ offset: false })),
+  end_at: toTypedSchema(z.string().datetime({ offset: false })),
 };
 
 export const UpdateBookingRequest = {
   plate_number: toTypedSchema(z.string().min(3).max(16)),
-  start_at: toTypedSchema(z.string().datetime()),
-  end_at: toTypedSchema(z.string().datetime()),
+  start_at: toTypedSchema(z.string().datetime({ offset: false })),
+  end_at: toTypedSchema(z.string().datetime({ offset: false })),
   status: toTypedSchema(
     z.nativeEnum({
       UNPAID: "UNPAID",
