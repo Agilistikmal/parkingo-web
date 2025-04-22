@@ -21,4 +21,8 @@ export default defineNuxtConfig({
   modules: ["@nuxt/image", "@pinia/nuxt"],
 
   plugins: ["~/plugins/autoAnimate"],
+
+  nitro: {
+    preset: "bun",
+  },
 });
