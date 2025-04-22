@@ -1,27 +1,25 @@
-# Step 1: Build with Bun
-FROM oven/bun:1.0.25 as builder
-
+# use the official Bun image
+# see all versions at https://hub.docker.com/r/oven/bun/tags
+FROM oven/bun:1 AS build
 WORKDIR /app
 
+COPY package.json bun.lockb ./
+
+# use ignore-scripts to avoid builting node modules like better-sqlite3
+RUN bun install --frozen-lockfile --ignore-scripts
+
+# Copy the entire project
 COPY . .
 
-RUN bun install
-RUN bun add ofetch
+RUN bun --bun run build
 
-# Build Nuxt (SSR output will be in .output)
-RUN bun run build
-
-# Step 2: Production runner
-FROM oven/bun:1.0.25
-
+# copy production dependencies and source code into final image
+FROM oven/bun:1 AS production
 WORKDIR /app
 
-COPY --from=builder /app/.output .output
-COPY --from=builder /app/package.json .
-COPY --from=builder /app/bun.lockb .
+# Only `.output` folder is needed from the build stage
+COPY --from=build /app/.output /app
 
-RUN bun install --production
-
-EXPOSE 3000
-
-CMD ["bun", ".output/server/index.mjs"]
+# run the app
+EXPOSE 3000/tcp
+ENTRYPOINT [ "bun", "--bun", "run", "/app/server/index.mjs" ]
