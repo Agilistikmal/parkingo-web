@@ -6,6 +6,7 @@ WORKDIR /app
 COPY . .
 
 RUN bun install
+RUN bun add ofetch
 
 # Build Nuxt (SSR output will be in .output)
 RUN bun run build
