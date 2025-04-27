@@ -6,13 +6,14 @@ import type { Response } from '~/lib/types/response';
 
 const reference = useRoute().params.reference as string;
 
-const booking = useFetch<Response<Booking>>(`/v1/bookings/reference/${reference}`, {
+const bookingFetch = useFetch<Response<Booking>>(`/v1/bookings/reference/${reference}`, {
   baseURL: useRuntimeConfig().public.apiBase,
   headers: {
     Authorization: "Bearer " + useAuthStore().token,
   },
   key: reference,
 });
+const booking = computed(() => bookingFetch.data.value?.data);
 
 const viewMap = ref(false);
 
@@ -24,15 +25,16 @@ const viewMap = ref(false);
       class="pb-48 pt-16 md:pt-48 px-8 w-full max-w-screen-xl mx-auto min-h-screen flex flex-wrap lg:flex-nowrap justify-center gap-4"
       v-auto-animate>
       <!-- Booking Confirmation -->
-      <div v-if="booking.status.value == 'success'" class="w-full max-w-screen-sm mx-auto">
+      <div v-if="bookingFetch.status.value == 'success' && booking" class="w-full max-w-screen-sm mx-auto">
         <div class="p-5 rounded-3xl rounded-b-xl bg-brand text-black">
           <div class="flex items-start justify-between gap-4">
             <div>
-              <h3 class="font-semibold">Konfirmasi Booking #{{ booking.data.value?.data?.id }}</h3>
-              <p class="text-sm">Payment Reference: {{ booking.data.value?.data?.payment_reference }}</p>
+              <h3 class="font-semibold">Konfirmasi Booking #{{ booking.id }}</h3>
+              <p class="text-sm">Payment Reference: <span class="font-bold">{{
+                booking.payment_reference }}</span></p>
             </div>
             <div>
-              <h2>{{ booking.data.value?.data?.status }}</h2>
+              <h2>{{ booking.status }}</h2>
             </div>
           </div>
         </div>
@@ -40,11 +42,11 @@ const viewMap = ref(false);
           <div>
             <div class="flex items-center gap-2">
               <Icon icon="mdi:email" width="24" height="24" />
-              <span>{{ booking.data.value?.data?.user?.email }}</span>
+              <span>{{ booking.user?.email }}</span>
             </div>
             <div class="flex items-center gap-2">
               <Icon icon="mdi:ticket-user" width="24" height="24" />
-              <span>{{ booking.data.value?.data?.user?.full_name }}</span>
+              <span>{{ booking.user?.full_name }}</span>
             </div>
 
             <hr class="my-2 border-t-[6px] border-dotted border-white/10">
@@ -53,28 +55,28 @@ const viewMap = ref(false);
               <Icon icon="mdi:access-time" width="24" height="24" />
               <div class="flex items-center gap-2">
                 <span>{{ Intl.DateTimeFormat("id-ID", { dateStyle: "full" }).format(new
-                  Date(booking.data.value?.data?.start_at!)) }}</span>
+                  Date(booking.start_at!)) }}</span>
               </div>
             </div>
             <div class="flex items-center gap-2">
               <Icon icon="mdi:access-time" width="24" height="24" />
               <div class="flex items-center gap-2">
                 <span>{{ Intl.DateTimeFormat("id-ID", { timeStyle: "long" }).format(new
-                  Date(booking.data.value?.data?.start_at!)) }}</span>
+                  Date(booking.start_at!)) }}</span>
                 <span>-</span>
                 <span>{{ Intl.DateTimeFormat("id-ID", { timeStyle: "long" }).format(new
-                  Date(booking.data.value?.data?.end_at!)) }}</span>
+                  Date(booking.end_at!)) }}</span>
               </div>
             </div>
             <div class="flex items-center gap-2">
               <Icon icon="mdi:cash" width="24" height="24" />
               <div class="flex items-center gap-2">
                 <span class="font-bold">Rp{{
-                  Intl.NumberFormat("id-ID").format(booking.data.value?.data?.total_fee!)
-                }}</span>
-                <span class="text-white/70">(Rp{{ Intl.NumberFormat("id-ID").format(booking.data.value?.data?.slot.fee!)
-                  }} x {{
-                    booking.data.value?.data?.total_hours }} jam)</span>
+                  Intl.NumberFormat("id-ID").format(booking.total_fee!)
+                  }}</span>
+                <span class="text-white/70">(Rp{{ Intl.NumberFormat("id-ID").format(booking.slot.fee!)
+                }} x {{
+                    booking.total_hours }} jam)</span>
               </div>
             </div>
 
@@ -84,13 +86,13 @@ const viewMap = ref(false);
               <div>
                 <div class="flex items-center gap-2 text-brand">
                   <Icon icon="mdi:parking" width="24" height="24" />
-                  <NuxtLink :href="`/p/${booking.data.value?.data?.parking.slug}`" target="_blank">{{
-                    booking.data.value?.data?.parking?.name
-                    }}</NuxtLink>
+                  <NuxtLink :href="`/p/${booking.parking.slug}`" target="_blank">{{
+                    booking.parking?.name
+                  }}</NuxtLink>
                 </div>
                 <div class="flex items-center gap-2 text-brand">
                   <Icon icon="mdi:selection-location" width="24" height="24" />
-                  <span class="font-bold">{{ booking.data.value?.data?.slot.name }}</span>
+                  <span class="font-bold">{{ booking.slot.name }}</span>
                 </div>
               </div>
 
@@ -103,8 +105,7 @@ const viewMap = ref(false);
 
         <!-- Button -->
         <div class="mt-5">
-          <NuxtLink v-if="booking.data.value?.data?.status == 'UNPAID'" :href="booking.data.value.data.payment_link"
-            target="_blank">
+          <NuxtLink v-if="booking.status == 'UNPAID'" :href="booking.payment_link" target="_blank">
             <Button class="w-full">
               <template #icon>
                 <Icon icon="mdi:external-link" width="24" height="24" />
@@ -116,19 +117,18 @@ const viewMap = ref(false);
       </div>
 
       <!-- View Map -->
-      <div v-if="viewMap" class="w-full max-w-screen-sm mx-auto">
-        <ParkingLayout :layout="booking.data.value?.data?.parking.layout"
-          :selected="`${booking.data.value?.data?.slot.row}-${booking.data.value?.data?.slot.col}`" />
+      <div v-if="viewMap && booking" class="w-full max-w-screen-sm mx-auto">
+        <ParkingLayout :layout="booking.parking.layout" :selected="`${booking.slot.row}-${booking.slot.col}`" />
       </div>
     </div>
 
-    <div v-if="booking.status.value == 'error'">
+    <div v-if="bookingFetch.status.value == 'error'">
       <div class="p-5 rounded-3xl rounded-b-xl bg-red-500 text-black">
-        <h3 class="font-semibold">Error {{ booking.error.value?.statusCode }}</h3>
-        <p class="text-sm">{{ booking.error.value?.statusMessage }}</p>
+        <h3 class="font-semibold">Error {{ bookingFetch.error.value?.statusCode }}</h3>
+        <p class="text-sm">{{ bookingFetch.error.value?.statusMessage }}</p>
       </div>
       <div class="p-5 rounded-3xl rounded-t-xl bg-white/10">
-        {{ booking.error.value?.message }}
+        {{ bookingFetch.error.value?.message }}
       </div>
     </div>
   </NuxtLayout>

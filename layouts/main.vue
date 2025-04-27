@@ -1,4 +1,7 @@
 <script setup lang="ts">
+import type { Response } from '~/lib/types/response'
+import type { User } from '~/lib/types/user'
+
 
 useSeoMeta({
   author: "Agil Ghani Istikmal",
@@ -8,11 +11,12 @@ useSeoMeta({
   mode: "server"
 })
 
-const cookieToken = useCookie("token")
 const route = useRoute()
 
 if (route.query.token) {
+  const cookieToken = useCookie("token")
   cookieToken.value = route.query.token as string
+  useAuthStore().token = cookieToken.value
   useRouter().replace(route.path)
 }
 </script>

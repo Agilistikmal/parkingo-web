@@ -22,13 +22,10 @@ useSeoMeta({
   mode: "server"
 })
 
-const parkings = ref<Parking[] | null>()
-onMounted(async () => {
-  const res: Response<Parking[]> = await $fetch('/v1/parkings', {
-    baseURL: useRuntimeConfig().public.apiBase
-  })
-  parkings.value = res.data
+const parkingsFetch = useFetch<Response<Parking[]>>('/v1/parkings', {
+  baseURL: useRuntimeConfig().public.apiBase
 })
+const parkings = computed(() => parkingsFetch.data.value?.data ?? []);
 
 </script>
 

@@ -4,7 +4,8 @@ import { Icon } from '@iconify/vue'
 import type { Parking, ParkingSlot } from '~/lib/types/parking';
 import type { Response } from '~/lib/types/response';
 import { Field, Form, ErrorMessage } from 'vee-validate';
-import { CreateBookingRequest, UpdateBookingRequest, type Booking } from '~/lib/types/booking';
+import { CreateBookingRequest, type Booking } from '~/lib/types/booking';
+import type { AsyncData } from '#app';
 
 useSeoMeta({
   title: "Parkingo - UTY 1",
@@ -25,38 +26,18 @@ useSeoMeta({
   mode: "server"
 })
 
-const route = useRoute()
-
-const parking = ref<Parking | null>()
+const parkingFetch = await useFetch<Response<Parking>>(`/v1/parkings/slug/${useRoute().params.slug}`, {
+  baseURL: useRuntimeConfig().public.apiBase,
+  key: useRoute().params.slug as string,
+})
+const parking = computed(() => parkingFetch.data.value?.data ?? null);
 
 const slots = ref<{ [key: string]: ParkingSlot }>({})
-
-onMounted(async () => {
-  const res: Response<Parking> = await $fetch(`/v1/parkings/slug/${route.params.slug}`, {
-    baseURL: useRuntimeConfig().public.apiBase
-  })
-  if (res.data) {
-    parking.value = res.data
-
-    for (const slot of res.data.slots) {
-      slots.value[`${slot.row}-${slot.col}`] = slot
-    }
-  }
-})
+for (const slot of parking.value?.slots ?? []) {
+  slots.value[`${slot.row}-${slot.col}`] = slot
+}
 
 const config = useRuntimeConfig()
-
-const currentUser = ref()
-
-const authStore = useAuthStore()
-if (authStore.isAuthenticated) {
-  currentUser.value = await $fetch("/v1/users/me", {
-    baseURL: config.public.apiBase,
-    headers: {
-      "Authorization": "Bearer " + useCookie("token").value
-    }
-  })
-}
 
 const selected = ref();
 const openBookingMenu = ref(false)
@@ -74,7 +55,6 @@ watch([startAt, totalHours], () => {
   endAt.value = endAtTemp.value.toISOString().slice(0, 16)
 })
 
-const booking = ref<Booking | null>(null)
 async function handleBooking(values: any) {
   const req = {
     ...values,
@@ -83,27 +63,29 @@ async function handleBooking(values: any) {
     start_at: new Date(values.start_at).toISOString(),
     end_at: new Date(values.end_at).toISOString(),
   }
-  const res: Response<Booking> = await $fetch("/v1/bookings", {
+
+  const bookingPostFetch = await useFetch<Response<Booking>>(`/v1/bookings`, {
+    baseURL: useRuntimeConfig().public.apiBase,
     method: "POST",
-    baseURL: config.public.apiBase,
     headers: {
-      "Authorization": "Bearer " + useAuthStore().token
+      "Authorization": "Bearer " + useAuthStore().token,
     },
     body: req
   })
+  const booking = computed(() => bookingPostFetch.data.value?.data ?? null);
 
-  if (res.data) {
-    booking.value = res.data
-    await navigateTo(res.data.payment_link, { external: true, open: { target: "_blank" } })
+  if (bookingPostFetch.status.value == "success" && booking.value) {
+    await navigateTo(booking.value.payment_link, { external: true, open: { target: "_blank" } })
+    await navigateTo(`/b/${booking.value.payment_reference}`)
   }
-
 }
 </script>
 
 <template>
   <NuxtLayout name="main">
     <div class="pb-48 pt-16 md:pt-48 px-8 w-full max-w-screen-xl mx-auto min-h-screen">
-      <div v-if="parking">
+      <LoadingBar v-if="parkingFetch.status.value == 'pending'" />
+      <div v-if="parkingFetch.status.value == 'success' && parking">
         <!-- Hero -->
         <div>
           <h4 class="font-semibold">{{ parking.name }}</h4>
@@ -193,7 +175,8 @@ async function handleBooking(values: any) {
           <!-- Booking Form -->
           <div v-auto-animate>
             <div v-if="openBookingMenu" class="mt-5">
-              <Form class="p-5 rounded-3xl bg-white/10 w-full max-w-xl" @submit="handleBooking">
+              <Form class="p-5 rounded-3xl bg-white/10 w-full max-w-xl" @submit="handleBooking"
+                v-if="useAuthStore().isAuthenticated">
                 <div class="text-center">
                   <h2>Form Booking</h2>
                   <h4>Slot Parkir <span class="font-bold text-brand">{{ slots[selected].name }}</span></h4>
@@ -232,13 +215,29 @@ async function handleBooking(values: any) {
                 </label>
 
                 <p class="mt-2 italic text-white/70">*Biaya Rp{{ Intl.NumberFormat("id-ID").format(slots[selected].fee)
-                  }}/jam</p>
+                }}/jam</p>
 
                 <Button class="w-full mt-5">
                   <template #text>Booking Sekarang Rp{{ Intl.NumberFormat("id-ID").format(slots[selected].fee *
                     totalHours) }}</template>
                 </Button>
               </Form>
+
+              <div v-else class="p-5 rounded-3xl bg-white/10 w-full max-w-xl">
+                <div class="text-center">
+                  <h2>Login</h2>
+                  <h4>Login untuk melakukan pemesanan</h4>
+                </div>
+
+                <NuxtLink :href="`/auth/login?redirect_url=${useRequestURL()}`" bg="bg-white" class="block mt-5">
+                  <Button bg="bg-white" class="w-full">
+                    <template #icon>
+                      <Icon icon="flat-color-icons:google" width="24" height="24" />
+                    </template>
+                    <template #text>Masuk</template>
+                  </Button>
+                </NuxtLink>
+              </div>
             </div>
           </div>
           <!-- End Booking Form -->
@@ -254,7 +253,7 @@ async function handleBooking(values: any) {
             <template #text>
               <div v-auto-animate>
                 <p v-if="!openBookingMenu">Lanjut Booking Rp{{ Intl.NumberFormat("id-ID").format(slots[selected].fee)
-                }}/jam</p>
+                  }}/jam</p>
                 <p v-else>Kembali</p>
               </div>
             </template>

@@ -3,8 +3,10 @@ import { Icon } from '@iconify/vue/dist/iconify.js';
 import type { Auth } from '~/lib/types/auth';
 import type { Response } from '~/lib/types/response';
 
+const redirectUrl = useRoute().query.redirect_url || useRequestURL().origin
+
 async function handleLogin() {
-  const res: Response<Auth> = await $fetch("/v1/authenticate?redirect_url=" + window.location.origin, {
+  const res: Response<Auth> = await $fetch("/v1/authenticate?redirect_url=" + redirectUrl, {
     baseURL: useRuntimeConfig().public.apiBase
   })
   if (res.data) {
@@ -25,6 +27,8 @@ async function handleLogin() {
           <div class="text-center">
             <h2>Masuk</h2>
             <p class="text-white/70">Masuk dengan satu klik atau membuat akun jika belum terdaftar.</p>
+            <p class="text-white/70 text-xs italic">Kamu akan diarahkan kembali ke <span class="text-accent">{{
+              redirectUrl }}</span></p>
           </div>
           <div class="mt-5 space-y-2">
             <Button bg="bg-white/10" color="text-white" class="w-full" @click="handleLogin">
