@@ -39,17 +39,19 @@ for (const slot of parking.value?.slots ?? []) {
 const selected = ref();
 const openBookingMenu = ref(false)
 
-const startAt = ref(new Date().toISOString().slice(0, 16))
+function getLocalISOString() {
+  const now = new Date()
+  const offset = now.getTimezoneOffset()
+  const localTime = new Date(now.getTime() - offset * 60000)
+  return localTime.toISOString().slice(0, 16)
+}
+const startAt = ref(getLocalISOString())
 const totalHours = ref(3)
-const endAtTemp = ref(new Date())
-const endAt = ref(endAtTemp.value.toISOString().slice(0, 16))
-endAtTemp.value.setHours(endAtTemp.value.getHours() + totalHours.value)
-endAt.value = endAtTemp.value.toISOString().slice(0, 16)
 
-watch([startAt, totalHours], () => {
-  endAtTemp.value = new Date(startAt.value)
-  endAtTemp.value.setHours(endAtTemp.value.getHours() + totalHours.value)
-  endAt.value = endAtTemp.value.toISOString().slice(0, 16)
+const endAt = computed(() => {
+  const temp = new Date(startAt.value)
+  temp.setHours(temp.getHours() + totalHours.value)
+  return temp.toISOString().slice(0, 16)
 })
 
 const bookingReq = ref<any>()
@@ -61,10 +63,11 @@ const bookingPostFetch = await useFetch<Response<Booking>>(`/v1/bookings`, {
   },
   body: bookingReq,
   immediate: false,
+  server: false
 })
 async function handleBooking(values: any) {
   bookingReq.value = {
-    ...values,
+    plate_number: values.plate_number,
     parking_id: parking.value?.id,
     slot_id: slots.value[selected.value].id,
     start_at: new Date(values.start_at).toISOString(),
@@ -219,8 +222,8 @@ async function handleBooking(values: any) {
                   }}/jam</p>
 
                 <div v-if="bookingPostFetch.status.value == 'error'" class="mt-2">
-                  <p class="text-sm italic text-red-200">Gagal melakukan booking, silahkan coba lagi</p>
-                  <p class="text-sm italic text-red-200">{{ bookingPostFetch.error.value?.message }}</p>
+                  <p class="text-sm italic text-red-200">Error: {{ bookingPostFetch.error.value?.data?.message ??
+                    "Something went wrong" }}</p>
                 </div>
 
                 <Button class="w-full mt-5">
