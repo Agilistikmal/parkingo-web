@@ -5,7 +5,6 @@ import type { Parking, ParkingSlot } from '~/lib/types/parking';
 import type { Response } from '~/lib/types/response';
 import { Field, Form, ErrorMessage } from 'vee-validate';
 import { CreateBookingRequest, type Booking } from '~/lib/types/booking';
-import type { AsyncData } from '#app';
 
 useSeoMeta({
   title: "Parkingo - UTY 1",
@@ -37,8 +36,6 @@ for (const slot of parking.value?.slots ?? []) {
   slots.value[`${slot.row}-${slot.col}`] = slot
 }
 
-const config = useRuntimeConfig()
-
 const selected = ref();
 const openBookingMenu = ref(false)
 
@@ -55,8 +52,18 @@ watch([startAt, totalHours], () => {
   endAt.value = endAtTemp.value.toISOString().slice(0, 16)
 })
 
+const bookingReq = ref<any>()
+const bookingPostFetch = await useFetch<Response<Booking>>(`/v1/bookings`, {
+  baseURL: useRuntimeConfig().public.apiBase,
+  method: "POST",
+  headers: {
+    "Authorization": "Bearer " + useAuthStore().token,
+  },
+  body: bookingReq,
+  immediate: false,
+})
 async function handleBooking(values: any) {
-  const req = {
+  bookingReq.value = {
     ...values,
     parking_id: parking.value?.id,
     slot_id: slots.value[selected.value].id,
@@ -64,14 +71,8 @@ async function handleBooking(values: any) {
     end_at: new Date(values.end_at).toISOString(),
   }
 
-  const bookingPostFetch = await useFetch<Response<Booking>>(`/v1/bookings`, {
-    baseURL: useRuntimeConfig().public.apiBase,
-    method: "POST",
-    headers: {
-      "Authorization": "Bearer " + useAuthStore().token,
-    },
-    body: req
-  })
+  await bookingPostFetch.execute()
+
   const booking = computed(() => bookingPostFetch.data.value?.data ?? null);
 
   if (bookingPostFetch.status.value == "success" && booking.value) {
@@ -215,11 +216,20 @@ async function handleBooking(values: any) {
                 </label>
 
                 <p class="mt-2 italic text-white/70">*Biaya Rp{{ Intl.NumberFormat("id-ID").format(slots[selected].fee)
-                }}/jam</p>
+                  }}/jam</p>
+
+                <div v-if="bookingPostFetch.status.value == 'error'" class="mt-2">
+                  <p class="text-sm italic text-red-200">Gagal melakukan booking, silahkan coba lagi</p>
+                  <p class="text-sm italic text-red-200">{{ bookingPostFetch.error.value?.message }}</p>
+                </div>
 
                 <Button class="w-full mt-5">
-                  <template #text>Booking Sekarang Rp{{ Intl.NumberFormat("id-ID").format(slots[selected].fee *
-                    totalHours) }}</template>
+                  <template #text>
+                    <p v-if="bookingPostFetch.status.value == 'pending'">Loading...</p>
+                    <p v-else>
+                      Booking Sekarang Rp{{ Intl.NumberFormat("id-ID").format(slots[selected].fee * totalHours) }}
+                    </p>
+                  </template>
                 </Button>
               </Form>
 
@@ -253,7 +263,7 @@ async function handleBooking(values: any) {
             <template #text>
               <div v-auto-animate>
                 <p v-if="!openBookingMenu">Lanjut Booking Rp{{ Intl.NumberFormat("id-ID").format(slots[selected].fee)
-                  }}/jam</p>
+                }}/jam</p>
                 <p v-else>Kembali</p>
               </div>
             </template>
