@@ -1,10 +1,12 @@
 import { toTypedSchema } from "@vee-validate/zod";
 import { z } from "zod";
+
 export type User = {
   id: number;
   username: string;
   full_name: string;
   email: string;
+  avatar_url: string;
   google_id: string;
   role: string;
   created_at: string;

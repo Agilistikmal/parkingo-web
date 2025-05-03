@@ -36,10 +36,11 @@ async function handleUpdateUser() {
             <h4>Foto Profil</h4>
           </div>
           <div class="group w-max h-max relative">
-            <NuxtImg
-              src="https://static.wixstatic.com/media/9258cc_10a2e00d0ba94f77b2d94b1ec687cafe~mv2.png/v1/fill/w_87,h_41,al_c,q_85,usm_0.66_1.00_0.01,enc_avif,quality_auto/9258cc_10a2e00d0ba94f77b2d94b1ec687cafe~mv2.png"
+            <NuxtImg v-if="currentUser?.avatar_url" :src="currentUser.avatar_url"
               class="w-32 h-32 rounded-3xl object-contain bg-white" />
-            <div class="hidden group-hover:block absolute top-0 left-0 w-full h-full bg-black/70 rounded-3xl">
+            <div v-else class="w-32 h-32 rounded-3xl object-contain bg-white/25"></div>
+            <div
+              class="hidden group-hover:block absolute cursor-pointer top-0 left-0 w-32 h-32 bg-black/70 rounded-3xl border-2 border-white/25">
               <div class="flex items-center justify-center h-full gap-2">
                 <Icon icon="mingcute:camera-fill" width="24" height="24" class="text-white" />
                 <span class="text-white">Ganti Foto</span>
