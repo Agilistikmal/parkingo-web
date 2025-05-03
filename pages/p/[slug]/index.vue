@@ -39,19 +39,26 @@ for (const slot of parking.value?.slots ?? []) {
 const selected = ref();
 const openBookingMenu = ref(false)
 
-function getLocalISOString() {
+function getDefaultTime() {
   const now = new Date()
-  const offset = now.getTimezoneOffset()
-  const localTime = new Date(now.getTime() - offset * 60000)
-  return localTime.toISOString().slice(0, 16)
+  now.setHours(now.getHours() + 1)
+  return now.toTimeString().slice(0, 5) // format "HH:mm"
 }
-const startAt = ref(getLocalISOString())
-const totalHours = ref(3)
+
+const startTime = computed(() => getDefaultTime())
+const totalHours = computed(() => 3)
+
+const startAt = computed(() => {
+  const today = new Date()
+  const [hours, minutes] = startTime.value.split(':').map(Number)
+  today.setHours(hours, minutes, 0, 0)
+  return today.toISOString()
+})
 
 const endAt = computed(() => {
   const temp = new Date(startAt.value)
   temp.setHours(temp.getHours() + totalHours.value)
-  return temp.toISOString().slice(0, 16)
+  return temp.toISOString()
 })
 
 const bookingReq = ref<any>()
@@ -70,8 +77,8 @@ async function handleBooking(values: any) {
     plate_number: values.plate_number,
     parking_id: parking.value?.id,
     slot_id: slots.value[selected.value].id,
-    start_at: new Date(values.start_at).toISOString(),
-    end_at: new Date(values.end_at).toISOString(),
+    start_at: startAt,
+    end_at: endAt,
   }
 
   await bookingPostFetch.execute()
@@ -192,10 +199,10 @@ async function handleBooking(values: any) {
                   <br>
                   <ErrorMessage name="plate_number" class="text-sm italic text-red-200" />
                 </label>
-                <label for="start_at">
+                <label for="start_time">
                   <h4>Waktu Masuk</h4>
-                  <Field id="start_at" name="start_at" type="datetime-local" placeholder="user@email.com"
-                    v-model="startAt" class="w-full" />
+                  <Field id="start_time" name="start_time" type="time" placeholder="user@email.com" v-model="startTime"
+                    class="w-full" />
                   <br>
                   <ErrorMessage name="start_at" class="text-sm italic text-red-200" />
                 </label>
@@ -219,7 +226,7 @@ async function handleBooking(values: any) {
                 </label>
 
                 <p class="mt-2 italic text-white/70">*Biaya Rp{{ Intl.NumberFormat("id-ID").format(slots[selected].fee)
-                  }}/jam</p>
+                }}/jam</p>
 
                 <div v-if="bookingPostFetch.status.value == 'error'" class="mt-2">
                   <p class="text-sm italic text-red-200">Error: {{ bookingPostFetch.error.value?.data?.message ??
@@ -266,7 +273,7 @@ async function handleBooking(values: any) {
             <template #text>
               <div v-auto-animate>
                 <p v-if="!openBookingMenu">Lanjut Booking Rp{{ Intl.NumberFormat("id-ID").format(slots[selected].fee)
-                }}/jam</p>
+                  }}/jam</p>
                 <p v-else>Kembali</p>
               </div>
             </template>

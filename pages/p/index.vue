@@ -40,6 +40,7 @@ const parkings = computed(() => parkingsFetch.data.value?.data ?? []);
       </div>
 
       <!-- Places -->
+      <LoadingBar v-if="parkingsFetch.status.value == 'pending'" class="mt-5" />
       <div class="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
         <div class="p-5 rounded-3xl bg-white/5" v-for="parking in parkings">
           <iframe :src="`https://maps.google.com/maps?q=${parking.latitude},${parking.longitude}&z=15&output=embed`"

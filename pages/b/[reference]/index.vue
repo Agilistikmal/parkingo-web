@@ -17,7 +17,7 @@ const booking = computed(() => bookingFetch.data.value?.data);
 
 const viewMap = ref(false);
 
-const paymentExpiredAt = new Date(booking.value?.payment_expired_at!);
+const paymentExpiredAt = computed(() => new Date(booking.value?.payment_expired_at!));
 const timeLeft = ref(0);
 
 let interval: NodeJS.Timeout | undefined
@@ -25,7 +25,7 @@ let interval: NodeJS.Timeout | undefined
 // Fungsi untuk menghitung selisih waktu
 const calculateTimeLeft = () => {
   const now = new Date()
-  const difference = paymentExpiredAt.getTime() - now.getTime()
+  const difference = paymentExpiredAt.value.getTime() - now.getTime()
   if (difference > 0) {
     timeLeft.value = difference
   } else {
@@ -113,9 +113,9 @@ onUnmounted(() => {
               <div class="flex items-center gap-2">
                 <span class="font-bold">Rp{{
                   Intl.NumberFormat("id-ID").format(booking.total_fee!)
-                }}</span>
+                  }}</span>
                 <span class="text-white/70">(Rp{{ Intl.NumberFormat("id-ID").format(booking.slot.fee!)
-                  }} x {{
+                }} x {{
                     booking.total_hours }} jam)</span>
               </div>
             </div>
@@ -128,7 +128,7 @@ onUnmounted(() => {
                   <Icon icon="mdi:parking" width="24" height="24" />
                   <NuxtLink :href="`/p/${booking.parking.slug}`" target="_blank">{{
                     booking.parking?.name
-                    }}</NuxtLink>
+                  }}</NuxtLink>
                 </div>
                 <div class="flex items-center gap-2 text-brand">
                   <Icon icon="mdi:selection-location" width="24" height="24" />
