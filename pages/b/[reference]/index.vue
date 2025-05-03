@@ -17,6 +17,46 @@ const booking = computed(() => bookingFetch.data.value?.data);
 
 const viewMap = ref(false);
 
+const paymentExpiredAt = new Date(booking.value?.payment_expired_at!);
+const timeLeft = ref(0);
+
+let interval: NodeJS.Timeout | undefined
+
+// Fungsi untuk menghitung selisih waktu
+const calculateTimeLeft = () => {
+  const now = new Date()
+  const difference = paymentExpiredAt.getTime() - now.getTime()
+  if (difference > 0) {
+    timeLeft.value = difference
+  } else {
+    timeLeft.value = 0
+  }
+}
+
+const formattedTime = computed(() => {
+  const totalSeconds = Math.floor(timeLeft.value / 1000)
+  const minutes = Math.floor((totalSeconds % 3600) / 60).toString().padStart(2, '0')
+  const seconds = (totalSeconds % 60).toString().padStart(2, '0')
+  return `${minutes}:${seconds}`
+})
+
+onMounted(() => {
+  // Hitung waktu sekarang dan target pertama kali
+  calculateTimeLeft()
+
+  // Set interval untuk update countdown setiap detik
+  interval = setInterval(() => {
+    calculateTimeLeft()
+    if (timeLeft.value <= 0) {
+      clearInterval(interval) // Hentikan interval jika countdown selesai
+    }
+  }, 1000)
+})
+
+onUnmounted(() => {
+  clearInterval(interval) // Pastikan interval dihentikan saat komponen dihapus
+})
+
 </script>
 
 <template>
@@ -73,9 +113,9 @@ const viewMap = ref(false);
               <div class="flex items-center gap-2">
                 <span class="font-bold">Rp{{
                   Intl.NumberFormat("id-ID").format(booking.total_fee!)
-                  }}</span>
+                }}</span>
                 <span class="text-white/70">(Rp{{ Intl.NumberFormat("id-ID").format(booking.slot.fee!)
-                }} x {{
+                  }} x {{
                     booking.total_hours }} jam)</span>
               </div>
             </div>
@@ -88,7 +128,7 @@ const viewMap = ref(false);
                   <Icon icon="mdi:parking" width="24" height="24" />
                   <NuxtLink :href="`/p/${booking.parking.slug}`" target="_blank">{{
                     booking.parking?.name
-                  }}</NuxtLink>
+                    }}</NuxtLink>
                 </div>
                 <div class="flex items-center gap-2 text-brand">
                   <Icon icon="mdi:selection-location" width="24" height="24" />
@@ -110,7 +150,7 @@ const viewMap = ref(false);
               <template #icon>
                 <Icon icon="mdi:external-link" width="24" height="24" />
               </template>
-              <template #text>Lanjutkan Pembayaran</template>
+              <template #text>Lanjutkan Pembayaran {{ formattedTime }}</template>
             </Button>
           </NuxtLink>
         </div>

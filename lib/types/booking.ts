@@ -18,6 +18,7 @@ export type Booking = {
   total_fee: number;
   payment_reference: string;
   payment_link: string;
+  payment_expired_at: string;
   status: "UNPAID" | "PAID" | "CANCELLED" | "EXPIRED" | "COMPLETED";
   created_at: string;
   updated_at: string;
