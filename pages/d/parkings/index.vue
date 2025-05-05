@@ -17,7 +17,7 @@ onMounted(async () => {
     <div>
       <h3>Area Parkir Saya</h3>
       <p>Menampilkan daftar area parkir yang dimiliki</p>
-      <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 mx-auto md:mx-0" />
+      <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 " />
     </div>
 
     <div class="flex items-center gap-2 w-full">

@@ -36,7 +36,7 @@ const parkings = computed(() => parkingsFetch.data.value?.data ?? []);
       <div>
         <h4 class="font-semibold">Area Parkir</h4>
         <p>Pilih tempat atau area parkir.</p>
-        <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 mx-auto md:mx-0" />
+        <div class="px-5 py-1 rounded-lg bg-brand w-max my-2" />
       </div>
 
       <!-- Places -->

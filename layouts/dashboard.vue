@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Icon } from '@iconify/vue/dist/iconify.js'
 import type { Auth } from '~/lib/types/auth'
 import type { Response } from '~/lib/types/response'
 
@@ -24,6 +25,7 @@ const currentUser = ref(await useAuthStore().getCurrentUser)
 if (!currentUser.value) {
   useRouter().replace("/auth/login")
 }
+
 </script>
 
 <template>
@@ -32,7 +34,7 @@ if (!currentUser.value) {
       <slot name="navbar">
         <NavbarDashboard />
       </slot>
-      <main class="font-jakarta w-full bg-black text-white px-8 mt-5">
+      <main class="font-jakarta w-full bg-black text-white px-8 overflow-scroll mt-24 md:mt-5">
         <slot />
       </main>
     </div>

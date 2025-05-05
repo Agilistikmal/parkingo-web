@@ -34,13 +34,24 @@ const adminMenus = [
   },
 ]
 
+const openSidebar = ref(false)
+
 </script>
 
 <template>
-  <nav class="text-white w-xs p-8 bg-white/10 min-h-dvh">
-    <div class="flex flex-col justify-between h-full gap-2">
-      <div class="space-y-4">
+  <nav
+    :class="`text-white w-max p-8 bg-black absolute z-50 rounded-3xl md:rounded-none top-0 left-0 md:relative md:min-h-screen md:w-xs`">
+    <div class="block md:hidden" @click="openSidebar = !openSidebar">
+      <button v-if="!openSidebar">
+        <Icon icon="mdi:hamburger-menu" width="24" height="24" class="text-white" />
+      </button>
+      <button v-else>
+        <Icon icon="mdi:close" width="24" height="24" class="text-white" />
+      </button>
+    </div>
 
+    <div :class="`flex flex-col justify-between h-full gap-2 ${!openSidebar && 'hidden'} md:flex`">
+      <div class="space-y-4">
         <div>
           <NuxtImg src="/assets/logo.png" />
           <h4>Hi, {{ currentUser?.full_name }}</h4>

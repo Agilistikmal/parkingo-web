@@ -104,7 +104,7 @@ async function handleBooking(values: any) {
             <Icon icon="mdi:location" width="24" height="24" class="inline" />
             {{ parking.address }}
           </p>
-          <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 mx-auto md:mx-0" />
+          <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 " />
         </div>
         <!-- End Hero -->
 
@@ -264,7 +264,7 @@ async function handleBooking(values: any) {
         </div>
 
         <!-- Booking Button -->
-        <div v-auto-animate>
+        <div v-auto-animate class="mt-5">
           <Button v-if="selected" @click="openBookingMenu = !openBookingMenu">
             <template #icon>
               <Icon v-if="!openBookingMenu" icon="solar:alt-arrow-right-bold" width="24" height="24" />

@@ -36,23 +36,23 @@ function getStatusColor(status: string): string {
     <div>
       <h3>Riwayat Booking</h3>
       <p>Menampilkan riwayat pemesanan anda</p>
-      <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 mx-auto md:mx-0" />
+      <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 " />
     </div>
 
-    <div>
+    <div class="overflow-x-scroll">
       <table class="w-full">
         <thead class="bg-brand h-12 text-black">
           <tr>
-            <th>Nama</th>
-            <th>Plat Nomor</th>
-            <th>Waktu Pemesanan</th>
-            <th>Tanggal Parkir</th>
-            <th>Jam Masuk</th>
-            <th>Jam Selesai</th>
-            <th>Durasi</th>
-            <th>Total Biaya</th>
-            <th>Status</th>
-            <th>Action</th>
+            <th class="px-8">Nama</th>
+            <th class="px-8">Plat Nomor</th>
+            <th class="px-8">Waktu Pemesanan</th>
+            <th class="px-8">Tanggal Parkir</th>
+            <th class="px-8">Jam Masuk</th>
+            <th class="px-8">Jam Selesai</th>
+            <th class="px-8">Durasi</th>
+            <th class="px-8">Total Biaya</th>
+            <th class="px-8">Status</th>
+            <th class="px-8">Action</th>
           </tr>
         </thead>
         <tbody v-if="bookingsFetch.status.value == 'success'" class="text-center">

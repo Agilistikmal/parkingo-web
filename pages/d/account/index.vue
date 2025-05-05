@@ -26,7 +26,7 @@ async function handleUpdateUser() {
     <div>
       <h3>Pengaturan Akun</h3>
       <p>Menampilkan pengaturan tentang akun</p>
-      <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 mx-auto md:mx-0" />
+      <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 " />
     </div>
 
     <div class="space-y-2">

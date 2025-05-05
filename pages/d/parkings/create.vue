@@ -102,7 +102,7 @@ async function handleCreateForm(values: any) {
     <div>
       <h3>Tambah Area Parkir</h3>
       <p>Silahkan isi form dibawah ini untuk menambahkan area parkir baru</p>
-      <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 mx-auto md:mx-0" />
+      <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 " />
     </div>
 
     <Form class="p-5 rounded-3xl bg-white/10 w-full max-w-xl" @submit="handleCreateForm">

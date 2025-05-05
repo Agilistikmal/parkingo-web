@@ -26,7 +26,7 @@ if (route.query.token) {
     <slot name="navbar">
       <Navbar />
     </slot>
-    <main class="font-jakarta w-full bg-black text-white">
+    <main class="font-jakarta w-full bg-black text-white pt-8 md:pt-0">
       <slot />
     </main>
     <slot name="footer">

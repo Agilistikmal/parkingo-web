@@ -59,7 +59,7 @@ async function handleDeleteParking() {
     <div>
       <h3>Area Parkir {{ parking?.name }}</h3>
       <p>Menampilkan daftar area parkir <span class="text-brand">{{ slug }}</span></p>
-      <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 mx-auto md:mx-0" />
+      <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 " />
     </div>
 
     <LoadingBar v-if="parkingFetch.status.value == 'pending'" />
