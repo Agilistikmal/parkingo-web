@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { Icon } from '@iconify/vue/dist/iconify.js';
 import type { Booking } from '~/lib/types/booking';
 import type { Response } from '~/lib/types/response';
 
@@ -51,23 +52,36 @@ function getStatusColor(status: string): string {
             <th>Durasi</th>
             <th>Total Biaya</th>
             <th>Status</th>
+            <th>Action</th>
           </tr>
         </thead>
         <tbody v-if="bookingsFetch.status.value == 'success'" class="text-center">
           <tr v-for="booking in bookings" :key="booking.id" class="h-12 bg-white/5">
             <td>{{ booking.parking?.name }}</td>
             <td class="font-bold">{{ booking.plate_number }}</td>
-            <td>{{ Intl.DateTimeFormat("id-ID", { dateStyle: "short", timeStyle: "long" }).format(new
-              Date(booking.created_at)) }}</td>
+            <td>
+              {{ Intl.DateTimeFormat("id-ID", { dateStyle: "short", timeStyle: "long" }).format(new
+                Date(booking.created_at)) }}
+            </td>
             <td>{{ Intl.DateTimeFormat("id-ID", { dateStyle: "long" }).format(new Date(booking.start_at)) }}</td>
             <td>{{ Intl.DateTimeFormat("id-ID", { timeStyle: "long" }).format(new Date(booking.start_at)) }}</td>
             <td>{{ Intl.DateTimeFormat("id-ID", { timeStyle: "long" }).format(new Date(booking.end_at)) }}</td>
             <td>{{ booking.total_hours }} jam</td>
-            <td>Rp{{ Intl.NumberFormat("id-ID").format(booking.total_fee)
-            }}
+            <td>
+              Rp{{ Intl.NumberFormat("id-ID").format(booking.total_fee) }}
             </td>
-            <td :class="`font-bold ${getStatusColor(booking.status)}`">{{
-              booking.status }}</td>
+            <td :class="`font-bold ${getStatusColor(booking.status)}`">
+              {{ booking.status }}
+            </td>
+            <td>
+              <NuxtLink :href="`/b/${booking.payment_reference}`" target="_blank">
+                <div class="flex items-center gap-1 text-center justify-center">
+                  <p v-if="booking.status == 'UNPAID'" class="text-brand">Bayar</p>
+                  <p v-else>Lihat</p>
+                  <Icon icon="mdi:external-link" width="16" height="16" />
+                </div>
+              </NuxtLink>
+            </td>
           </tr>
           <p v-if="!bookings">Riwayat booking tidak ditemukan.</p>
         </tbody>
