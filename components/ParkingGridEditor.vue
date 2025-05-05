@@ -1,12 +1,22 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
+const props = defineProps<{
+  modelValue?: string[][];
+}>();
+
 const rows = 6;
 const cols = 9;
 
 const layout = ref<string[][]>(
   Array.from({ length: rows }, () => Array(cols).fill("EMPTY"))
 );
+
+onMounted(() => {
+  if (props.modelValue) {
+    layout.value = props.modelValue.map(row => [...row]);
+  }
+});
 
 const selectedType = ref("P");
 const isMouseDown = ref(false);
