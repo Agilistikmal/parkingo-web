@@ -29,10 +29,10 @@ useSeoMeta({
       <div class="flex flex-col-reverse md:grid md:grid-cols-2 justify-between gap-8">
         <!-- Left side -->
         <div class="text-center md:text-left">
-          <NuxtImg src="/assets/logo.png" class="h-16" />
+          <NuxtImg src="/assets/logo.png" class="h-16 mx-auto md:mx-0" />
           <h3>Solusi pintar parkir modern</h3>
           <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 mx-auto md:mx-0" />
-          <div class="flex items-center gap-2 mt-5 justify-center md:justify-start">
+          <div class="flex flex-wrap items-center gap-2 mt-5 justify-center md:justify-start">
             <NuxtLink href="/p">
               <Button class="mt-2">
                 <template #icon>
