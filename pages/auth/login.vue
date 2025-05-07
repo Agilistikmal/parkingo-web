@@ -20,8 +20,9 @@ async function handleLogin() {
 <template>
   <div class="w-full min-h-dvh bg-black text-white">
     <div class="grid grid-cols-1 md:grid-cols-3">
-      <div class="bg-brand min-h-dvh hidden md:block"></div>
-      <div class="w-full px-8 pt-48 mx-auto col-span-2">
+      <div class="bg-brand min-h-dvh hidden md:block relative overflow-hidden">
+      </div>
+      <div class="w-full px-8 pt-24 md:pt-48 mx-auto col-span-2">
         <NuxtImg src="/assets/logo.png" class="h-12 mx-auto" />
         <div class="mt-5 mx-auto bg-white/10 rounded-3xl px-8 py-5 w-full max-w-xl h-max">
           <div class="text-center">

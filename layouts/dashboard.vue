@@ -34,7 +34,7 @@ if (!currentUser.value) {
       <slot name="navbar">
         <NavbarDashboard />
       </slot>
-      <main class="font-jakarta w-full bg-black text-white px-8 overflow-scroll mt-24 md:mt-5">
+      <main class="font-jakarta w-full bg-black text-white px-8 pb-24 overflow-scroll mt-24 md:mt-5">
         <slot />
       </main>
     </div>

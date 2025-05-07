@@ -66,7 +66,7 @@ const openSidebar = ref(false)
           </div>
         </div>
 
-        <div>
+        <div v-if="currentUser?.role == 'ADMIN'">
           <h4>Admin Menu</h4>
           <div v-for="adminMenu in adminMenus">
             <NuxtLink :href="adminMenu.href" class="border-l-2 border-brand pl-2">
