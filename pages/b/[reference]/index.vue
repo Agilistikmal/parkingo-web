@@ -2,6 +2,7 @@
 import { Icon } from '@iconify/vue/dist/iconify.js';
 import type { Booking } from '~/lib/types/booking';
 import type { Response } from '~/lib/types/response';
+import QRCode from 'qrcode.vue';
 
 
 const reference = useRoute().params.reference as string;
@@ -57,6 +58,23 @@ onUnmounted(() => {
   clearInterval(interval) // Pastikan interval dihentikan saat komponen dihapus
 })
 
+function getStatusColor(status: string) {
+  switch (status) {
+    case 'PAID':
+      return 'bg-green-500 text-white'
+    case 'UNPAID':
+      return 'bg-brand text-black'
+    case 'EXPIRED':
+      return 'bg-red-500 text-white'
+    case 'CANCELLED':
+      return 'bg-gray-500 text-white'
+    case 'COMPLETED':
+      return "bg-cyan-500 text-white"
+    default:
+      return 'bg-gray-500'
+  }
+}
+
 </script>
 
 <template>
@@ -66,10 +84,10 @@ onUnmounted(() => {
       v-auto-animate>
       <!-- Booking Confirmation -->
       <div v-if="bookingFetch.status.value == 'success' && booking" class="w-full max-w-screen-sm mx-auto">
-        <div class="p-5 rounded-3xl rounded-b-xl bg-brand text-black">
-          <div class="flex items-start justify-between gap-4">
+        <div :class="`p-5 rounded-3xl rounded-b-xl ${getStatusColor(booking.status)}`">
+          <div class="flex items-start justify-between gap-4 flex-col-reverse sm:flex-row">
             <div>
-              <h3 class="font-semibold">Konfirmasi Booking #{{ booking.id }}</h3>
+              <h3 class="font-semibold">Konfirmasi Booking</h3>
               <p class="text-sm">Payment Reference: <span class="font-bold">{{
                 booking.payment_reference }}</span></p>
             </div>
@@ -80,6 +98,13 @@ onUnmounted(() => {
         </div>
         <div class="p-5 rounded-3xl rounded-t-xl bg-white/10">
           <div>
+            <div class="my-4 flex flex-col items-center gap-2">
+              <QRCode :value="booking.payment_reference" :size="200" level="H" class="bg-white p-2 rounded-lg" />
+              <p class="text-sm text-white/70">Perlihatkan QR Code ini saat di pintu keluar</p>
+            </div>
+
+            <hr class="mb-2 mt-5 border-t-[6px] border-dotted border-white/10">
+
             <div class="flex items-center gap-2">
               <Icon icon="mdi:email" width="24" height="24" />
               <span>{{ booking.user?.email }}</span>

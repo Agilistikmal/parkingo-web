@@ -25,4 +25,13 @@ export default defineNuxtConfig({
   nitro: {
     preset: "bun",
   },
+
+  // Fix serialization issues
+  experimental: {
+    payloadExtraction: false,
+  },
+
+  app: {
+    keepalive: true,
+  },
 });

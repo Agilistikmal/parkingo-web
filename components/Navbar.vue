@@ -3,6 +3,11 @@ import { NuxtImg } from '#components';
 import { Icon } from '@iconify/vue/dist/iconify.js';
 
 const currentUser = ref(await useAuthStore().getCurrentUser);
+const avatarError = ref(false);
+
+const handleAvatarError = () => {
+  avatarError.value = true;
+};
 
 </script>
 
@@ -31,7 +36,15 @@ const currentUser = ref(await useAuthStore().getCurrentUser);
             <div>
               <div v-if="currentUser" class="relative">
                 <NuxtLink href="/d/account" class="flex items-center gap-1">
-                  <NuxtImg :src="currentUser.avatar_url" class="w-12 rounded-3xl" />
+                  <template v-if="!avatarError">
+                    <NuxtImg :src="currentUser.avatar_url" @error="handleAvatarError"
+                      class="w-12 h-12 rounded-3xl object-cover" />
+                  </template>
+                  <template v-else>
+                    <div class="w-12 h-12 rounded-3xl bg-white/10 flex items-center justify-center">
+                      <Icon icon="mdi:account" class="w-8 h-8" />
+                    </div>
+                  </template>
                 </NuxtLink>
               </div>
               <div v-else>
