@@ -13,6 +13,7 @@ export type Parking = {
   longitude: number;
   layout: any[][];
   slots: ParkingSlot[];
+  default_fee: number;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;
