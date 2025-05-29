@@ -109,6 +109,7 @@ async function handleEditMetadata() {
     });
 
     // Refresh data
+    navigateTo(`/d/parkings/${slug}`)
     await refreshNuxtData();
     showMetadataEditor.value = false;
   } catch (e) {
@@ -256,12 +257,13 @@ async function handleDeleteParking() {
       <div v-if="showLayoutEditor" class="p-5 rounded-3xl bg-white/10 w-full max-w-xl">
         <div class="text-center">
           <h4>Ubah Layout Parkiran</h4>
+          <p class="text-sm text-brand">Note: Parking Layout belum dapat diubah</p>
         </div>
         <div class="w-max mx-auto mt-5">
           <ParkingGridEditor :model-value="parking?.layout || []"
             @update:model-value="newVal => parking && (parking.layout = newVal)" />
         </div>
-        <Button class="w-full mt-5" @click="handleEditLayout">
+        <Button class="w-full mt-5 opacity-25" disabled>
           <template #text>Simpan Layout</template>
         </Button>
       </div>
