@@ -99,7 +99,7 @@ watch(selectedAddress, () => {
 async function handleEditMetadata() {
   try {
     if (!parkingId.value) return;
-    await $fetch(`/v1/parkings/${parkingId.value}`, {
+    const res = await $fetch<Response<Parking>>(`/v1/parkings/${parkingId.value}`, {
       baseURL: useRuntimeConfig().public.apiBase,
       headers: {
         Authorization: "Bearer " + useAuthStore().token,
@@ -108,8 +108,7 @@ async function handleEditMetadata() {
       body: metadataForm.value
     });
 
-    // Refresh data
-    navigateTo(`/d/parkings/${slug}`)
+    navigateTo(`/d/parkings/${res.data?.slug}`)
     await refreshNuxtData();
     showMetadataEditor.value = false;
   } catch (e) {
