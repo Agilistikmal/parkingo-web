@@ -76,7 +76,7 @@ const openSidebar = ref(false)
         </div>
       </div>
 
-      <Button bg="bg-red-500" color="text-white" @click="handleLogout">
+      <Button bg="bg-red-500" color="text-white" @click="handleLogout" class="fixed bottom-5 left-5">
         <template #icon>
           <Icon icon="mdi:logout" width="24" height="24" />
         </template>

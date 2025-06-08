@@ -14,6 +14,10 @@ export type Parking = {
   layout: any[][];
   slots: ParkingSlot[];
   default_fee: number;
+  total_earnings: number;
+  total_bookings: number;
+  available_earnings: number;
+  withdrawn_earnings: number;
   created_at: string;
   updated_at: string;
   deleted_at: string | null;

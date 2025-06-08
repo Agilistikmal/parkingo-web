@@ -13,7 +13,7 @@ const parkingsFetch = useFetch<Response<Parking[]>>(`/v1/parkings`, {
 const parkings = computed(() => parkingsFetch.data.value?.data);
 const selectedParking = ref<Parking | null>(null)
 
-const bookingsFetch = useFetch<Response<Booking[]>>(`/v1/bookings?parking_id=${selectedParking.value?.id}`, {
+const bookingsFetch = useFetch<Response<Booking[]>>(`/v1/bookings/history?parking_id=${selectedParking.value?.id}`, {
   baseURL: useRuntimeConfig().public.apiBase,
   headers: {
     Authorization: "Bearer " + useAuthStore().token,
@@ -122,7 +122,20 @@ function getStatusIcon(status: string): string {
       </div>
 
       <div v-else>
-        <p class="text-gray-400">{{ selectedParking.name }} | {{ bookings?.length }} bookings</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-white/5 backdrop-blur-lg rounded-3xl p-6">
+            <p class="text-gray-400">Total Booking</p>
+            <p class="text-brand">{{ bookings?.length }}</p>
+          </div>
+          <div class="bg-white/5 backdrop-blur-lg rounded-3xl p-6">
+            <p class="text-gray-400">Total Pendapatan</p>
+            <p class="text-brand">Rp{{ Intl.NumberFormat("id-ID").format(selectedParking.total_earnings) }}</p>
+          </div>
+          <div class="bg-white/5 backdrop-blur-lg rounded-3xl p-6">
+            <p class="text-gray-400">Total Pendapatan Belum Ditarik</p>
+            <p class="text-brand">Rp{{ Intl.NumberFormat("id-ID").format(selectedParking.available_earnings) }}</p>
+          </div>
+        </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
           <div v-for="booking in bookings" :key="booking.id"
             class="bg-white/5 backdrop-blur-lg rounded-3xl p-6 hover:bg-white/10 transition-colors duration-200">
