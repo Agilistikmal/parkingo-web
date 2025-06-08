@@ -30,20 +30,21 @@ onBeforeUnmount(() => {
   if (html5QrCode) html5QrCode.stop().catch(() => { })
 })
 
-const bookingFetch = useFetch<Response<Booking>>(
-  () => `/v1/bookings/reference/${result.value}`,
+
+const checkoutFetch = useFetch<Response<Booking>>(
+  () => `/v1/bookings/checkout/${result.value}`,
   {
     baseURL: useRuntimeConfig().public.apiBase,
     headers: {
       Authorization: "Bearer " + useAuthStore().token,
     },
+    method: "POST",
     key: result.value,
     immediate: false,
     watch: [result],
   }
 )
-
-const booking = computed(() => bookingFetch.data.value?.data);
+const booking = computed(() => checkoutFetch.data.value?.data);
 
 function getStatusColor(status: string) {
   switch (status) {
@@ -80,7 +81,7 @@ function getStatusColor(status: string) {
     <!-- Booking Details -->
     <div class="px-8 w-full max-w-screen-md flex flex-wrap lg:flex-nowrap justify-center gap-4 mt-5" v-auto-animate>
       <!-- Booking Confirmation -->
-      <div v-if="bookingFetch.status.value == 'success' && booking" class="w-full max-w-screen-sm mx-auto">
+      <div v-if="checkoutFetch.status.value == 'success' && booking" class="w-full max-w-screen-sm mx-auto">
         <div :class="`p-5 rounded-3xl rounded-b-xl ${getStatusColor(booking.status)}`">
           <div class="flex items-start justify-between gap-4 flex-col-reverse sm:flex-row">
             <div>
@@ -154,6 +155,12 @@ function getStatusColor(status: string) {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      <div v-else-if="checkoutFetch.status.value == 'error'" class="w-full max-w-screen-sm mx-auto">
+        <div class="p-5 rounded-3xl rounded-b-xl bg-red-500 text-white">
+          <h3 class="font-semibold">Error</h3>
+          <p>{{ checkoutFetch.error.value?.data.message }}</p>
         </div>
       </div>
     </div>
