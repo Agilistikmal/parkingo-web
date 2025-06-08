@@ -32,6 +32,10 @@ const adminMenus = [
     name: "Riwayat Booking Parkiran",
     href: "/d/parkings/bookings"
   },
+  {
+    name: "Checkout",
+    href: "/d/scanner/checkout"
+  },
 ]
 
 const openSidebar = ref(false)

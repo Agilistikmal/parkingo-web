@@ -60,6 +60,31 @@ function getStatusIcon(status: string): string {
       return 'mdi:help-circle';
   }
 }
+
+let syncStatus = ref<string | null>(null);
+let syncError = ref<string | null>(null);
+
+watch(selectedParking, () => {
+  syncStatus.value = null;
+  syncError.value = null;
+});
+
+async function syncParking() {
+  try {
+    syncStatus.value = 'pending';
+    await $fetch(`/v1/parkings/${selectedParking.value?.id}/sync`, {
+      baseURL: useRuntimeConfig().public.apiBase,
+      headers: {
+        Authorization: "Bearer " + useAuthStore().token,
+      },
+      method: 'POST',
+    });
+    syncStatus.value = 'success';
+    parkingsFetch.refresh();
+  } catch (error) {
+    syncStatus.value = 'error';
+  }
+}
 </script>
 
 <template>
@@ -122,7 +147,7 @@ function getStatusIcon(status: string): string {
       </div>
 
       <div v-else>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="bg-white/5 backdrop-blur-lg rounded-3xl p-6">
             <p class="text-gray-400">Total Booking</p>
             <p class="text-brand">{{ bookings?.length }}</p>
@@ -131,10 +156,20 @@ function getStatusIcon(status: string): string {
             <p class="text-gray-400">Total Pendapatan</p>
             <p class="text-brand">Rp{{ Intl.NumberFormat("id-ID").format(selectedParking.total_earnings) }}</p>
           </div>
-          <div class="bg-white/5 backdrop-blur-lg rounded-3xl p-6">
-            <p class="text-gray-400">Total Pendapatan Belum Ditarik</p>
-            <p class="text-brand">Rp{{ Intl.NumberFormat("id-ID").format(selectedParking.available_earnings) }}</p>
-          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <p>Data tidak valid?</p>
+          <button v-if="!syncStatus" class="text-brand cursor-pointer" @click="syncParking()">sync ulang data
+            #{{ selectedParking.id }}</button>
+          <p v-else-if="syncStatus == 'pending'" class="text-brand">
+            loading...
+          </p>
+          <p v-else-if="syncStatus == 'error'" class="text-red-500">
+            {{ syncError }}
+          </p>
+          <p v-else-if="syncStatus == 'success'" class="text-green-500">
+            Data berhasil disync
+          </p>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-5">
           <div v-for="booking in bookings" :key="booking.id"
