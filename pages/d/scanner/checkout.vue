@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { Icon } from '@iconify/vue/dist/iconify.js'
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import type { Booking } from '~/lib/types/booking'
 import type { Response } from '~/lib/types/response'
 
 const result = ref('')
-let html5QrCode: any
+const inputBookingId = ref('')
 
+let html5QrCode: any
 onMounted(async () => {
   if (import.meta.client) {
     const { Html5Qrcode } = await import('html5-qrcode')
@@ -62,6 +64,13 @@ function getStatusColor(status: string) {
       return 'bg-gray-500'
   }
 }
+
+function manualCheckout() {
+  if (inputBookingId.value) {
+    result.value = inputBookingId.value
+    checkoutFetch.execute()
+  }
+}
 </script>
 
 
@@ -73,90 +82,116 @@ function getStatusColor(status: string) {
       <div class="px-5 py-1 rounded-lg bg-brand w-max my-2 " />
     </div>
 
-    <!-- QR Code Scanner -->
-    <div class="w-full max-w-screen-md rounded-3xl overflow-hidden bg-white/10 backdrop-blur-lg">
-      <div id="qr-reader" class="w-full h-full"></div>
+    <div class="grid grid-cols-2 gap-4">
+      <!-- QR Code Scanner -->
+      <div class="w-full max-w-screen-md rounded-3xl overflow-hidden bg-white/10 backdrop-blur-lg">
+        <div id="qr-reader" class="w-full h-full"></div>
+      </div>
+
+      <!-- Manual Input -->
+      <div class="w-full h-max max-w-screen-md rounded-3xl overflow-hidden bg-white/10 backdrop-blur-lg">
+        <div class="p-5 rounded-3xl rounded-b-xl bg-white/10">
+          <h3 class="font-semibold mb-2">Manual Input</h3>
+          <p>Masukkan Booking Reference</p>
+          <input type="text" class="w-full px5 py-2 rounded-lg bg-white/10 text-white placeholder:text-white/50"
+            placeholder="PKGO-ABCXYZ" v-model="inputBookingId" />
+          <Button class="w-full mt-5" @click="manualCheckout">
+            <template #icon>
+              <Icon icon="mdi:check" width="24" height="24" />
+            </template>
+            <template #text>Checkout</template>
+          </Button>
+        </div>
+      </div>
     </div>
 
     <!-- Booking Details -->
     <div class="px-8 w-full max-w-screen-md flex flex-wrap lg:flex-nowrap justify-center gap-4 mt-5" v-auto-animate>
       <!-- Booking Confirmation -->
-      <div v-if="checkoutFetch.status.value == 'success' && booking" class="w-full max-w-screen-sm mx-auto">
-        <div :class="`p-5 rounded-3xl rounded-b-xl ${getStatusColor(booking.status)}`">
-          <div class="flex items-start justify-between gap-4 flex-col-reverse sm:flex-row">
-            <div>
-              <h3 class="font-semibold">Konfirmasi Booking</h3>
-              <p class="text-sm">Payment Reference: <span class="font-bold">{{
-                booking.payment_reference }}</span></p>
-            </div>
-            <div>
-              <h2>{{ booking.status }}</h2>
-            </div>
+      <div v-if="checkoutFetch.status.value == 'success'" class="w-full max-w-screen-sm mx-auto">
+        <div v-if="!booking">
+          <div class="p-5 rounded-3xl rounded-b-xl bg-white/10">
+            <h3 class="font-semibold">Failed to fetch booking details</h3>
           </div>
         </div>
-        <div class="p-5 rounded-3xl rounded-t-xl bg-white/10">
-          <div>
-            <hr class="mb-2 mt-5 border-t-[6px] border-dotted border-white/10">
-
-            <div class="flex items-center gap-2">
-              <Icon icon="mdi:email" width="24" height="24" />
-              <span>{{ booking.user?.email }}</span>
-            </div>
-            <div class="flex items-center gap-2">
-              <Icon icon="mdi:ticket-user" width="24" height="24" />
-              <span>{{ booking.user?.full_name }}</span>
-            </div>
-
-            <hr class="my-2 border-t-[6px] border-dotted border-white/10">
-
-            <div class="flex items-center gap-2">
-              <Icon icon="mdi:access-time" width="24" height="24" />
-              <div class="flex items-center gap-2">
-                <span>{{ Intl.DateTimeFormat("id-ID", { dateStyle: "full" }).format(new
-                  Date(booking.start_at!)) }}</span>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <Icon icon="mdi:access-time" width="24" height="24" />
-              <div class="flex items-center gap-2">
-                <span>{{ Intl.DateTimeFormat("id-ID", { timeStyle: "long" }).format(new
-                  Date(booking.start_at!)) }}</span>
-                <span>-</span>
-                <span>{{ Intl.DateTimeFormat("id-ID", { timeStyle: "long" }).format(new
-                  Date(booking.end_at!)) }}</span>
-              </div>
-            </div>
-            <div class="flex items-center gap-2">
-              <Icon icon="mdi:cash" width="24" height="24" />
-              <div class="flex items-center gap-2">
-                <span class="font-bold">Rp{{
-                  Intl.NumberFormat("id-ID").format(booking.total_fee!)
-                  }}</span>
-                <span class="text-white/70">(Rp{{ Intl.NumberFormat("id-ID").format(booking.slot.fee!)
-                  }} x {{
-                    booking.total_hours }} jam)</span>
-              </div>
-            </div>
-
-            <hr class="my-2 border-t-[6px] border-dotted border-white/10">
-
-            <div class="flex justify-between items-start gap-2">
+        <div v-else>
+          <div :class="`p-5 rounded-3xl rounded-b-xl ${getStatusColor(booking.status)}`">
+            <div class="flex items-start justify-between gap-4 flex-col-reverse sm:flex-row">
               <div>
-                <div class="flex items-center gap-2 text-brand">
-                  <Icon icon="mdi:parking" width="24" height="24" />
-                  <NuxtLink :href="`/p/${booking.parking.slug}`" target="_blank">{{
-                    booking.parking?.name
-                    }}</NuxtLink>
+                <h3 class="font-semibold">Konfirmasi Booking</h3>
+                <p class="text-sm">Payment Reference: <span class="font-bold">{{
+                  booking.payment_reference }}</span></p>
+              </div>
+              <div>
+                <h2>{{ booking.status }}</h2>
+              </div>
+            </div>
+          </div>
+          <div class="p-5 rounded-3xl rounded-t-xl bg-white/10">
+            <div>
+              <hr class="mb-2 mt-5 border-t-[6px] border-dotted border-white/10">
+
+              <div class="flex items-center gap-2">
+                <Icon icon="mdi:email" width="24" height="24" />
+                <span>{{ booking.user?.email }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <Icon icon="mdi:ticket-user" width="24" height="24" />
+                <span>{{ booking.user?.full_name }}</span>
+              </div>
+
+              <hr class="my-2 border-t-[6px] border-dotted border-white/10">
+
+              <div class="flex items-center gap-2">
+                <Icon icon="mdi:access-time" width="24" height="24" />
+                <div class="flex items-center gap-2">
+                  <span>{{ Intl.DateTimeFormat("id-ID", { dateStyle: "full" }).format(new
+                    Date(booking.start_at!)) }}</span>
                 </div>
-                <div class="flex items-center gap-2 text-brand">
-                  <Icon icon="mdi:selection-location" width="24" height="24" />
-                  <span class="font-bold">{{ booking.slot.name }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <Icon icon="mdi:access-time" width="24" height="24" />
+                <div class="flex items-center gap-2">
+                  <span>{{ Intl.DateTimeFormat("id-ID", { timeStyle: "long" }).format(new
+                    Date(booking.start_at!)) }}</span>
+                  <span>-</span>
+                  <span>{{ Intl.DateTimeFormat("id-ID", { timeStyle: "long" }).format(new
+                    Date(booking.end_at!)) }}</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <Icon icon="mdi:cash" width="24" height="24" />
+                <div class="flex items-center gap-2">
+                  <span class="font-bold">Rp{{
+                    Intl.NumberFormat("id-ID").format(booking.total_fee!)
+                    }}</span>
+                  <span class="text-white/70">(Rp{{ Intl.NumberFormat("id-ID").format(booking.slot.fee!)
+                    }} x {{
+                      booking.total_hours }} jam)</span>
+                </div>
+              </div>
+
+              <hr class="my-2 border-t-[6px] border-dotted border-white/10">
+
+              <div class="flex justify-between items-start gap-2">
+                <div>
+                  <div class="flex items-center gap-2 text-brand">
+                    <Icon icon="mdi:parking" width="24" height="24" />
+                    <NuxtLink :href="`/p/${booking.parking.slug}`" target="_blank">{{
+                      booking.parking?.name
+                      }}</NuxtLink>
+                  </div>
+                  <div class="flex items-center gap-2 text-brand">
+                    <Icon icon="mdi:selection-location" width="24" height="24" />
+                    <span class="font-bold">{{ booking.slot.name }}</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      <LoadingBar v-else-if="checkoutFetch.status.value == 'pending'" />
       <div v-else-if="checkoutFetch.status.value == 'error'" class="w-full max-w-screen-sm mx-auto">
         <div class="p-5 rounded-3xl rounded-b-xl bg-red-500 text-white">
           <h3 class="font-semibold">Error</h3>
