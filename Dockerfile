@@ -18,6 +18,7 @@ FROM oven/bun:1 AS production
 WORKDIR /app
 
 # Only `.output` folder is needed from the build stage
+COPY --from=build /app/node_modules /app/node_modules
 COPY --from=build /app/.output /app
 
 # run the app
