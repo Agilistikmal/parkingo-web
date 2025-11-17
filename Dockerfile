@@ -7,6 +7,7 @@ COPY package.json bun.lockb ./
 
 # use ignore-scripts to avoid builting node modules like better-sqlite3
 RUN bun install --frozen-lockfile
+RUN bun install --platform=linux --arch=x64 sharp
 
 # Copy the entire project
 COPY . .
