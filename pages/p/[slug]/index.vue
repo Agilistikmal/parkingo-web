@@ -29,6 +29,12 @@ const parkingFetch = await useFetch<Response<Parking>>(`/v1/parkings/slug/${useR
   baseURL: useRuntimeConfig().public.apiBase,
   key: useRoute().params.slug as string,
 })
+if (import.meta.client) {
+  setInterval(() => {
+    parkingFetch.execute()
+  }, 5000)
+}
+
 const parking = computed(() => parkingFetch.data.value?.data ?? null);
 
 const slots = ref<{ [key: string]: ParkingSlot }>({})
@@ -95,8 +101,8 @@ async function handleBooking(values: any) {
 <template>
   <NuxtLayout name="main">
     <div class="pb-48 pt-16 md:pt-48 px-8 w-full max-w-screen-xl mx-auto min-h-screen">
-      <LoadingBar v-if="parkingFetch.status.value == 'pending'" />
-      <div v-if="parkingFetch.status.value == 'success' && parking">
+      <LoadingBar v-if="parkingFetch.status.value == 'pending' && parking == null" />
+      <div v-if="parking">
         <!-- Hero -->
         <div>
           <h4 class="font-semibold">{{ parking.name }}</h4>
@@ -226,7 +232,7 @@ async function handleBooking(values: any) {
                 </label>
 
                 <p class="mt-2 italic text-white/70">*Biaya Rp{{ Intl.NumberFormat("id-ID").format(slots[selected].fee)
-                }}/jam</p>
+                  }}/jam</p>
 
                 <div v-if="bookingPostFetch.status.value == 'error'" class="mt-2">
                   <p class="text-sm italic text-red-200">Error: {{ bookingPostFetch.error.value?.data?.message ??
@@ -273,7 +279,7 @@ async function handleBooking(values: any) {
             <template #text>
               <div v-auto-animate>
                 <p v-if="!openBookingMenu">Lanjut Booking Rp{{ Intl.NumberFormat("id-ID").format(slots[selected].fee)
-                  }}/jam</p>
+                }}/jam</p>
                 <p v-else>Kembali</p>
               </div>
             </template>
