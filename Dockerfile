@@ -17,10 +17,6 @@ RUN bun --bun run build
 FROM oven/bun:1 AS production
 WORKDIR /app
 
-RUN apk add --no-cache \
-    vips
-    # vips tanpa '-dev'
-
 COPY --from=build /app/.output /app
 
 EXPOSE 3000/tcp
