@@ -22,6 +22,7 @@
     "ofetch": "^1.4.1",
     "pinia": "^3.0.1",
     "qrcode.vue": "^3.6.0",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.0.9",
     "vee-validate": "^4.15.0",
     "vue": "latest",
