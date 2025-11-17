@@ -1,25 +1,27 @@
-# use the official Bun image
-# see all versions at https://hub.docker.com/r/oven/bun/tags
 FROM oven/bun:1 AS build
 WORKDIR /app
 
+RUN apk add --no-cache \
+    build-base \
+    vips-dev \
+    pkgconfig
+
 COPY package.json bun.lockb ./
 
-# use ignore-scripts to avoid builting node modules like better-sqlite3
 RUN bun install --frozen-lockfile
 
-# Copy the entire project
 COPY . .
 
 RUN bun --bun run build
 
-# copy production dependencies and source code into final image
 FROM oven/bun:1 AS production
 WORKDIR /app
 
-# Only `.output` folder is needed from the build stage
+RUN apk add --no-cache \
+    vips
+    # vips tanpa '-dev'
+
 COPY --from=build /app/.output /app
 
-# run the app
 EXPOSE 3000/tcp
 ENTRYPOINT [ "bun", "--bun", "run", "/app/server/index.mjs" ]
