@@ -22,11 +22,44 @@ useSeoMeta({
   mode: "server"
 })
 
+const searchParams = useRoute().query;
+const userLocation = ref({
+  latitude: 0,
+  longitude: 0,
+})
+
+if (import.meta.client) {
+  if ("geolocation" in navigator) {
+    navigator.geolocation.getCurrentPosition((position) => {
+      console.log('position')
+      console.log(position)
+      userLocation.value = {
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude,
+      }
+    }, (error) => {
+      console.error('error getting user location', error)
+    })
+  } else {
+    console.log('geolocation not supported')
+  }
+}
+
+const filters = ref({
+  search: String(searchParams.search ?? ''),
+  user_latitude: userLocation.value.latitude,
+  user_longitude: userLocation.value.longitude,
+  radius: Number(searchParams.radius ?? 0),
+  sort_by: String(searchParams.sortBy ?? 'created_at'),
+  sort_order: String(searchParams.sortOrder ?? 'asc'),
+})
+
 const parkingsFetch = useFetch<Response<Parking[]>>('/v1/parkings', {
-  baseURL: useRuntimeConfig().public.apiBase
+  baseURL: useRuntimeConfig().public.apiBase,
+  query: filters.value,
+  server: false
 })
 const parkings = computed(() => parkingsFetch.data.value?.data ?? []);
-
 </script>
 
 <template>
@@ -35,11 +68,32 @@ const parkings = computed(() => parkingsFetch.data.value?.data ?? []);
       <!-- Hero -->
       <div>
         <h4 class="font-semibold">Area Parkir</h4>
-        <p>Pilih tempat atau area parkir.</p>
+        <p>Pilih tempat atau area parkir. <span v-if="userLocation.latitude && userLocation.longitude">Lokasi Anda: {{
+          userLocation.latitude }}, {{ userLocation.longitude }}</span></p>
         <div class="px-5 py-1 rounded-lg bg-brand w-max my-2" />
       </div>
 
       <!-- Places -->
+      <div class="flex items-center gap-2">
+        <div class="w-full">
+          <input class="w-full" type="text" v-model="filters.search" @change="parkingsFetch.refresh()"
+            placeholder="Cari parkiran" />
+        </div>
+        <div>
+          <select v-model="filters.sort_by" @change="parkingsFetch.refresh()">
+            <option value="created_at">Terbaru</option>
+            <option value="name">Nama</option>
+          </select>
+        </div>
+        <div>
+          <select v-model="filters.radius" @change="parkingsFetch.refresh()">
+            <option value="0">Semua</option>
+            <option value="1">1 km</option>
+            <option value="5">5 km</option>
+            <option value="10">10 km</option>
+          </select>
+        </div>
+      </div>
       <LoadingBar v-if="parkingsFetch.status.value == 'pending'" class="mt-5" />
       <div class="mt-5 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
         <div class="p-5 rounded-3xl bg-white/5" v-for="parking in parkings">
