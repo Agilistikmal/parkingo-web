@@ -54,11 +54,15 @@ useSeoMeta({
 
         <!-- Right side -->
         <div class="relative w-full h-max z-0 flex justify-center items-center mb-8">
-          <div class="-z-10 top-0 left-0 w-full">
-            <NuxtImg src="/image/logo/logo_eye_left.png" alt="" class="mx-auto animate-blur w-48 lg:w-96" />
-          </div>
-          <div class="absolute -bottom-10 left-0 w-full">
-            <NuxtImg src="/image/logo/logo_eye_left.png" alt="" class="z-20 mx-auto w-48 lg:w-96" />
+          <div class="relative h-[25vh] border-8 border-brand rounded-3xl">
+            <video src="/assets/video/car_booking.mp4" autoplay muted loop
+              class="w-full h-full object-cover border-4 border-black rounded-2xl" />
+            <div class="absolute bottom-0 right-0">
+              <div class="h-[10vh] border-4 border-brand rounded-2xl overflow-hidden translate-x-10 -translate-y-28">
+                <video src="/assets/video/phone_maps.mp4" autoplay muted loop
+                  class="w-full h-full object-cover border-2 border-black rounded-xl" />
+              </div>
+            </div>
           </div>
         </div>
       </div>

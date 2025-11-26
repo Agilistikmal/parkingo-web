@@ -68,25 +68,24 @@ const parkings = computed(() => parkingsFetch.data.value?.data ?? []);
       <!-- Hero -->
       <div>
         <h4 class="font-semibold">Area Parkir</h4>
-        <p>Pilih tempat atau area parkir. <span v-if="userLocation.latitude && userLocation.longitude">Lokasi Anda: {{
-          userLocation.latitude }}, {{ userLocation.longitude }}</span></p>
+        <p>Pilih tempat atau area parkir. <span class="text-white/70 text-xs"
+            v-if="userLocation.latitude && userLocation.longitude">Lokasi anda
+            ditemukan</span></p>
         <div class="px-5 py-1 rounded-lg bg-brand w-max my-2" />
       </div>
 
       <!-- Places -->
-      <div class="flex items-center gap-2">
-        <div class="w-full">
+      <div class="flex items-center gap-2 flex-wrap">
+        <div class="w-full md:w-max md:flex-1">
           <input class="w-full" type="text" v-model="filters.search" @change="parkingsFetch.refresh()"
             placeholder="Cari parkiran" />
         </div>
-        <div>
-          <select v-model="filters.sort_by" @change="parkingsFetch.refresh()">
+        <div class="flex items-center gap-2 w-full md:w-max">
+          <select class="w-full" v-model="filters.sort_by" @change="parkingsFetch.refresh()">
             <option value="created_at">Terbaru</option>
             <option value="name">Nama</option>
           </select>
-        </div>
-        <div>
-          <select v-model="filters.radius" @change="parkingsFetch.refresh()">
+          <select class="w-full" v-model="filters.radius" @change="parkingsFetch.refresh()">
             <option value="0">Semua</option>
             <option value="1">1 km</option>
             <option value="5">5 km</option>
